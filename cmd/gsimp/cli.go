@@ -13,13 +13,13 @@ type CLI struct {
 	LogLevel zerolog.Level    `short:"l" default:"info" help:"Log level"`
 	Version  kong.VersionFlag `short:"v"                help:"Output version"`
 
-	Create create.Cmd `cmd:"" help:"Create a new credentials store"`
+	Create create.Command `cmd:"" help:"Create a new credentials store"`
 }
 
 func (c *CLI) GetLogLevel() zerolog.Level {
 	return c.LogLevel
 }
 
-func (c *CLI) GetGlobals() any {
-	return &c.Globals
+func (c *CLI) RunArgs() []any {
+	return []any{&c.Globals}
 }

@@ -1,10 +1,12 @@
+GO ?= go
+
 MODULE_PATH := $(shell awk '/^module / { print $$2; exit }' $(dir $(abspath $(lastword $(MAKEFILE_LIST))))go.mod)
 
-PROJ_NAME := $(notdir $(MODULE_PATH))
-APP_NAMES := $(notdir $(dir $(wildcard cmd/*/*.go)))
+APP_NAMES := $(notdir $(patsubst %/,%,$(dir $(wildcard cmd/*/main.go))))
 
-BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
-VERSION := $(shell basename $(BRANCH))
+RELEASE_VERSION := $(shell git describe --tags --exact-match 2>/dev/null)
+DEV_VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
+VERSION ?= $(if $(RELEASE_VERSION),$(RELEASE_VERSION),$(DEV_VERSION))
 COMMIT := $(shell git rev-parse --short HEAD)
 
 NAME = $(patsubst %-$(VERSION),%,$(@F))
@@ -22,28 +24,31 @@ install: $(APP_NAMES)
 
 build: $(DEST_PATHS)
 
-$(APP_NAMES): generate
-	go install -ldflags $(LDFLAGS) $(SRC_PATH)
+$(APP_NAMES):
+	$(GO) install -ldflags $(LDFLAGS) $(SRC_PATH)
 
-$(DEST_PATHS): generate
-	go build -ldflags $(LDFLAGS) -o $@ $(SRC_PATH)
+$(DEST_PATHS):
+	$(GO) build -ldflags $(LDFLAGS) -o $@ $(SRC_PATH)
 
 generate:
-	go generate ./...
+	$(GO) generate ./...
 
 deps:
-	go mod download
+	$(GO) mod download
 
 tidy:
-	go mod tidy
+	$(GO) mod tidy
 
 update:
-	go get -u ./...
+	$(GO) get -u ./...
 
 fmt:
 	gofumpt -w .
 
-vet:
-	go vet ./...
+test:
+	$(GO) test ./...
 
-.PHONY: install generate deps build tidy update fmt vet
+vet:
+	$(GO) vet ./...
+
+.PHONY: install generate deps build tidy update fmt test vet
