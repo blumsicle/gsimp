@@ -1,16 +1,16 @@
-MODULE_PATH := $(shell sed -n 's/^module\s\+\(.*\)/\1/p' $(dir $(abspath $(lastword $(MAKEFILE_LIST))))go.mod)
+MODULE_PATH := $(shell awk '/^module / { print $$2; exit }' $(dir $(abspath $(lastword $(MAKEFILE_LIST))))go.mod)
 
 PROJ_NAME := $(notdir $(MODULE_PATH))
-APP_NAMES := $(filter-out %.go,$(notdir $(wildcard cmd/*)))
+APP_NAMES := $(notdir $(dir $(wildcard cmd/*/*.go)))
 
 BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 VERSION := $(shell basename $(BRANCH))
 COMMIT := $(shell git rev-parse --short HEAD)
 
 NAME = $(patsubst %-$(VERSION),%,$(@F))
-LDFLAGS ?= '-X $(MODULE_PATH)/cmd.Name=$(NAME) \
-		   -X $(MODULE_PATH)/cmd.Version=$(VERSION) \
-		   -X $(MODULE_PATH)/cmd.Commit=$(COMMIT) \
+LDFLAGS ?= '-X main.name=$(NAME) \
+		   -X main.version=$(VERSION) \
+		   -X main.commit=$(COMMIT) \
 		   -s -w'
 
 SRC_PATH = ./cmd/$(NAME)
@@ -41,7 +41,7 @@ update:
 	go get -u ./...
 
 fmt:
-	go fmt ./...
+	gofumpt -w .
 
 vet:
 	go vet ./...
