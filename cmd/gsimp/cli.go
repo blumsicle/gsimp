@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/alecthomas/kong"
 	"github.com/blumsicle/gsimp/cmd"
-	"github.com/blumsicle/gsimp/cmd/gsimp/create"
+	"github.com/blumsicle/gsimp/cmd/gsimp/example"
 	"github.com/rs/zerolog"
 )
 
@@ -13,7 +13,7 @@ type CLI struct {
 	LogLevel zerolog.Level    `short:"l" default:"info" help:"Log level"`
 	Version  kong.VersionFlag `short:"v"                help:"Output version"`
 
-	Create create.Command `cmd:"" help:"Create a new credentials store"`
+	Example example.Command `cmd:"" help:"Example subcommand for new projects"`
 }
 
 func (c *CLI) GetLogLevel() zerolog.Level {

@@ -1,4 +1,4 @@
-package cmd
+package cli
 
 type BuildInfo struct {
 	Name    string

@@ -1,4 +1,4 @@
-package cmd
+package cli
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"github.com/rs/zerolog"
 )
 
-type CLIRunner interface {
+type Runner interface {
 	GetLogLevel() zerolog.Level
 	RunArgs() []any
 }
@@ -19,16 +19,34 @@ type Config struct {
 	BuildInfo   BuildInfo
 }
 
-func Parse(cli any, cfg Config) *kong.Context {
-	return kong.Parse(
-		cli,
+func Options(cfg Config) []kong.Option {
+	return []kong.Option{
 		kong.Name(cfg.BuildInfo.Name),
 		kong.Description(cfg.Description),
 		kong.ConfigureHelp(kong.HelpOptions{Compact: true}),
 		kong.Vars{
 			"version": fmt.Sprintf("%s %s %s", cfg.BuildInfo.Name, cfg.BuildInfo.Version, cfg.BuildInfo.Commit),
 		},
-	)
+	}
+}
+
+func New(app any, cfg Config, options ...kong.Option) (*kong.Kong, error) {
+	options = append(Options(cfg), options...)
+	return kong.New(app, options...)
+}
+
+func Parse(app any, cfg Config) *kong.Context {
+	parser, err := New(app, cfg)
+	if err != nil {
+		panic(err)
+	}
+
+	ctx, err := parser.Parse(os.Args[1:])
+	if err != nil {
+		parser.FatalIfErrorf(err)
+	}
+
+	return ctx
 }
 
 func NewLogger(level zerolog.Level) zerolog.Logger {

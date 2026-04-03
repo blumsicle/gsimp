@@ -1,5 +1,5 @@
 package cmd
 
 type Globals struct {
-	CredsFile string `short:"c" default:"~/.bcreds.json" type:"path" help:"Credentials file to use"`
+	ConfigFile string `short:"c" default:"~/.config/starter/config.yaml" type:"path" help:"Path to the config file"`
 }

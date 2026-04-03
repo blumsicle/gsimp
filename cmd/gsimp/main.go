@@ -4,7 +4,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/blumsicle/gsimp/cmd"
+	cliutil "github.com/blumsicle/gsimp/internal/cli"
 	"github.com/rs/zerolog"
 )
 
@@ -16,23 +16,23 @@ var (
 
 func main() {
 	cli := &CLI{}
-	cfg := cmd.Config{
-		Description: "Credential manager",
-		BuildInfo: cmd.BuildInfo{
+	cfg := cliutil.Config{
+		Description: "Starter CLI template",
+		BuildInfo: cliutil.BuildInfo{
 			Name:    name,
 			Version: version,
 			Commit:  commit,
 		},
 	}
 
-	ctx := cmd.Parse(cli, cfg)
+	ctx := cliutil.Parse(cli, cfg)
 
 	zerolog.DurationFieldUnit = time.Minute
 	zerolog.TimeFieldFormat = time.DateTime + " MST"
 
-	log := cmd.NewLogger(cli.GetLogLevel())
+	log := cliutil.NewLogger(cli.GetLogLevel())
 
-	if err := cmd.Run(ctx, log, cli.RunArgs()...); err != nil {
+	if err := cliutil.Run(ctx, log, cli.RunArgs()...); err != nil {
 		log.Error().Err(err).Send()
 		os.Exit(1)
 	}

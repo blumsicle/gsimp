@@ -48,10 +48,17 @@ update:
 fmt:
 	gofumpt -w .
 
+check:
+	$(MAKE) test
+	$(MAKE) vet
+
+clean:
+	rm -rf bin
+
 test:
 	$(GO) test ./...
 
 vet:
 	$(GO) vet ./...
 
-.PHONY: install generate deps build rebuild tidy update fmt test vet
+.PHONY: install generate deps build rebuild tidy update fmt check clean test vet
