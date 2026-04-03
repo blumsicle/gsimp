@@ -34,11 +34,12 @@ func Parse(cli any, cfg Config) *kong.Context {
 func NewLogger(level zerolog.Level) zerolog.Logger {
 	cw := zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.DateTime + " MST"}
 
-	zerolog.SetGlobalLevel(level)
-	zerolog.DurationFieldUnit = time.Minute
-	zerolog.TimeFieldFormat = time.DateTime + " MST"
-
-	return zerolog.New(cw).With().Timestamp().Str("logger", "main").Logger()
+	return zerolog.New(cw).
+		Level(level).
+		With().
+		Timestamp().
+		Str("logger", "main").
+		Logger()
 }
 
 func Run(ctx *kong.Context, log zerolog.Logger, args ...any) error {

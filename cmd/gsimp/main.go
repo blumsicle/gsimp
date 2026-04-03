@@ -2,8 +2,10 @@ package main
 
 import (
 	"os"
+	"time"
 
 	"github.com/blumsicle/gsimp/cmd"
+	"github.com/rs/zerolog"
 )
 
 var (
@@ -24,6 +26,10 @@ func main() {
 	}
 
 	ctx := cmd.Parse(cli, cfg)
+
+	zerolog.DurationFieldUnit = time.Minute
+	zerolog.TimeFieldFormat = time.DateTime + " MST"
+
 	log := cmd.NewLogger(cli.GetLogLevel())
 
 	if err := cmd.Run(ctx, log, cli.RunArgs()...); err != nil {

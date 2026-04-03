@@ -24,6 +24,9 @@ install: $(APP_NAMES)
 
 build: $(DEST_PATHS)
 
+rebuild:
+	$(MAKE) -B build
+
 $(APP_NAMES):
 	$(GO) install -ldflags $(LDFLAGS) $(SRC_PATH)
 
@@ -51,4 +54,4 @@ test:
 vet:
 	$(GO) vet ./...
 
-.PHONY: install generate deps build tidy update fmt test vet
+.PHONY: install generate deps build rebuild tidy update fmt test vet
