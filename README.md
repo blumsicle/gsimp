@@ -37,7 +37,7 @@ Precedence is:
 The generated project includes:
 
 - a thin `main`
-- shared app config in `cmd/config.go` with defaults, YAML loading, and env var expansion
+- shared app config in `internal/appconfig`
 - shared CLI runtime code under `internal/cli`
 - shared injected args in `cmd/globals.go` with a default config path under `~/.config/<project>/`
 - a `<project>.yaml` example config file
@@ -69,5 +69,5 @@ The `make fmt` target expects these tools to be installed locally:
 
 - `cmd/gsimp` contains the generator binary entrypoint and commands.
 - `internal/projectgen` contains the project generator.
-- `cmd/config.go`, `cmd/globals.go`, `internal/cli`, and `cmd/<binary>/example` define the starter project that gets generated.
+- `internal/appconfig`, `internal/poststep`, `cmd/globals.go`, `internal/cli`, and `cmd/<binary>/example` define the generator/runtime pieces in this repo.
 - `Makefile` handles local build, install, and verification workflows.

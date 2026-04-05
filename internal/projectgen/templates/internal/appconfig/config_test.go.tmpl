@@ -1,4 +1,4 @@
-package cmd
+package appconfig
 
 import (
 	"os"
@@ -10,8 +10,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestDefaultConfig(t *testing.T) {
-	cfg := DefaultConfig()
+func TestDefault(t *testing.T) {
+	cfg := Default()
 
 	assert.Equal(t, ".", cfg.RootPath)
 	assert.Equal(t, "", cfg.GitLocation)
@@ -19,7 +19,7 @@ func TestDefaultConfig(t *testing.T) {
 }
 
 func TestLoadYAMLMissingFileKeepsDefaults(t *testing.T) {
-	cfg := DefaultConfig()
+	cfg := Default()
 	err := cfg.LoadYAML(filepath.Join(t.TempDir(), "missing.yaml"))
 	require.NoError(t, err)
 
@@ -39,7 +39,7 @@ func TestLoadYAMLOverridesDefaults(t *testing.T) {
 		),
 	)
 
-	cfg := DefaultConfig()
+	cfg := Default()
 	err := cfg.LoadYAML(configPath)
 	require.NoError(t, err)
 
@@ -61,7 +61,7 @@ func TestLoadYAMLExpandsEnvironmentVariables(t *testing.T) {
 		),
 	)
 
-	cfg := DefaultConfig()
+	cfg := Default()
 	err := cfg.LoadYAML(configPath)
 	require.NoError(t, err)
 

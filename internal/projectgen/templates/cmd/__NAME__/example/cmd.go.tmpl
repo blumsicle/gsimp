@@ -2,12 +2,13 @@ package example
 
 import (
 	"{{ .ModulePath }}/cmd"
+	"{{ .ModulePath }}/internal/appconfig"
 	"github.com/rs/zerolog"
 )
 
 type Command struct{}
 
-func (c *Command) Run(log zerolog.Logger, g *cmd.Globals, cfg *cmd.Config) error {
+func (c *Command) Run(log zerolog.Logger, g *cmd.Globals, cfg *appconfig.Config) error {
 	log.Info().
 		Str("config_file", g.ConfigFile).
 		Str("root_path", cfg.RootPath).

@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/alecthomas/kong"
-	"github.com/blumsicle/gsimp/cmd"
+	"github.com/blumsicle/gsimp/internal/appconfig"
 	cliutil "github.com/blumsicle/gsimp/internal/cli"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
@@ -28,7 +28,7 @@ func testConfig() cliutil.Config {
 func newTestParser(
 	t *testing.T,
 	cli *CLI,
-	appConfig *cmd.Config,
+	appConfig *appconfig.Config,
 	stdout *bytes.Buffer,
 	stderr *bytes.Buffer,
 	exitCode *int,
@@ -52,7 +52,7 @@ func newTestParser(
 
 func TestVersionFlag(t *testing.T) {
 	cli := &CLI{}
-	appConfig := &cmd.Config{}
+	appConfig := &appconfig.Config{}
 	var stdout bytes.Buffer
 	var stderr bytes.Buffer
 	exitCode := -1
@@ -69,7 +69,7 @@ func TestVersionFlag(t *testing.T) {
 
 func TestHelpFlag(t *testing.T) {
 	cli := &CLI{}
-	appConfig := &cmd.Config{}
+	appConfig := &appconfig.Config{}
 	var stdout bytes.Buffer
 	var stderr bytes.Buffer
 	exitCode := -1
@@ -100,7 +100,7 @@ func TestConfigFileLoadsAndFlagsOverrideIt(t *testing.T) {
 	)
 
 	cli := &CLI{}
-	appConfig := &cmd.Config{}
+	appConfig := &appconfig.Config{}
 	var stdout bytes.Buffer
 	var stderr bytes.Buffer
 	exitCode := -1

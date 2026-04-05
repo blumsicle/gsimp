@@ -2,13 +2,13 @@ package poststep
 
 import "context"
 
-type Input struct {
+type PostStepInput struct {
 	ProjectPath string
 	Name        string
 	ModulePath  string
 }
 
-type Step interface {
+type PostStep interface {
 	Name() string
-	Run(ctx context.Context, input Input) error
+	Run(ctx context.Context, input PostStepInput) error
 }

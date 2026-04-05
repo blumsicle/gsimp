@@ -4,6 +4,7 @@ import (
 	"github.com/alecthomas/kong"
 	"github.com/blumsicle/gsimp/cmd"
 	"github.com/blumsicle/gsimp/cmd/gsimp/create"
+	"github.com/blumsicle/gsimp/internal/appconfig"
 	"github.com/rs/zerolog"
 )
 
@@ -16,7 +17,7 @@ type CLI struct {
 	Create create.Command `cmd:"" help:"Create a new Go CLI starter project"`
 }
 
-func (c *CLI) AfterApply(cfg *cmd.Config) error {
+func (c *CLI) AfterApply(cfg *appconfig.Config) error {
 	if err := cfg.LoadYAML(c.ConfigFile); err != nil {
 		return err
 	}

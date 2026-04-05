@@ -31,13 +31,14 @@ The scaffold currently generates these files:
 - `Makefile`
 - `README.md`
 - `<project>.yaml`
-- `cmd/config.go`
-- `cmd/config_test.go`
 - `cmd/globals.go`
 - `cmd/<project>/cli.go`
 - `cmd/<project>/main.go`
 - `cmd/<project>/main_test.go`
 - `cmd/<project>/example/cmd.go`
+- `internal/appconfig/config.go`
+- `internal/appconfig/load.go`
+- `internal/appconfig/config_test.go`
 - `internal/cli/buildinfo.go`
 - `internal/cli/runner.go`
 
@@ -56,15 +57,15 @@ So generated projects normally include both `go.sum` and a fresh Git repository 
 The generated package layout is:
 
 - `cmd/<project>` for the binary entrypoint and command tree
-- `cmd/config.go` for typed app config defaults and YAML loading
 - `cmd/globals.go` for shared injected CLI globals
+- `internal/appconfig` for typed app config defaults, loading, and tests
 - `internal/cli` for parser/build-info/logger runtime helpers
 
 Why this split exists:
 
 - `internal/cli` is framework-style runtime code, not app config
-- `cmd/config.go` is app-level state shared across commands
 - `cmd/globals.go` stays importable by subcommands, unlike package `main`
+- `internal/appconfig` keeps app config out of the `cmd` namespace while still staying available across the module
 
 ## Generated `go.mod`
 
@@ -95,9 +96,9 @@ The generated module path is:
 
 The generated scaffold has two config-related types.
 
-### `cmd.Config`
+### `appconfig.Config`
 
-Defined in `cmd/config.go`.
+Defined in `internal/appconfig/config.go` and `internal/appconfig/load.go`.
 
 Current fields:
 
@@ -107,7 +108,8 @@ Current fields:
 
 Current defaults come from:
 
-- `func DefaultConfig() *Config`
+- `func Default() *Config`
+  now named `func Default() *Config`
 
 Those defaults are:
 
@@ -188,7 +190,7 @@ Responsibilities:
   - `name`
   - `version`
   - `commit`
-- create `appConfig := cmd.DefaultConfig()`
+- create `appConfig := appconfig.Default()`
 - create the root CLI struct
 - build the shared CLI runtime config
 - call `cliutil.Parse(...)`
@@ -221,7 +223,7 @@ Current help text:
 
 Current hook:
 
-- `func (c *CLI) AfterApply(cfg *cmd.Config) error`
+- `func (c *CLI) AfterApply(cfg *appconfig.Config) error`
 
 Current `AfterApply` behavior:
 
@@ -243,7 +245,7 @@ The scaffold includes one placeholder subcommand:
 
 Current handler signature:
 
-- `func (c *Command) Run(log zerolog.Logger, g *cmd.Globals, cfg *cmd.Config) error`
+- `func (c *Command) Run(log zerolog.Logger, g *cmd.Globals, cfg *appconfig.Config) error`
 
 Current behavior:
 
@@ -258,7 +260,7 @@ The example command exists both as starter code and as a test target for Kong in
 
 The generated project currently uses this precedence order:
 
-1. defaults from `DefaultConfig()`
+1. defaults from `appconfig.Default()`
 2. YAML loaded from `Globals.ConfigFile`
 3. explicit CLI flags
 
@@ -336,7 +338,7 @@ Version behavior:
 
 The scaffold includes two test files.
 
-### `cmd/config_test.go`
+### `internal/appconfig/config_test.go`
 
 Covers:
 
@@ -368,32 +370,33 @@ If recreating this scaffold from scratch in a new repo, the sequence is:
 
 1. Create `go.mod` with the dependency versions listed above.
 2. Create the Makefile with the targets and linker-flag behavior described above.
-3. Create `cmd/config.go` with `Config`, `DefaultConfig()`, and `LoadYAML(path)`.
-4. Create `cmd/config_test.go` with the config-loading tests.
-5. Create `cmd/globals.go` with the `ConfigFile` flag.
-6. Create `internal/cli/buildinfo.go`.
-7. Create `internal/cli/runner.go`.
-8. Create `cmd/<project>/main.go` that:
-   - builds `appConfig := cmd.DefaultConfig()`
+3. Create `internal/appconfig/config.go` with `Config` and `Default()`.
+4. Create `internal/appconfig/load.go` with `LoadYAML(path)`.
+5. Create `internal/appconfig/config_test.go` with the config-loading tests.
+6. Create `cmd/globals.go` with the `ConfigFile` flag.
+7. Create `internal/cli/buildinfo.go`.
+8. Create `internal/cli/runner.go`.
+9. Create `cmd/<project>/main.go` that:
+   - builds `appConfig := appconfig.Default()`
    - binds `&cli.Globals` and `appConfig`
    - creates the logger from `appConfig.LogLevel`
-9. Create `cmd/<project>/cli.go` with:
+10. Create `cmd/<project>/cli.go` with:
    - embedded `cmd.Globals`
    - `LogLevel *zerolog.Level`
    - `Version kong.VersionFlag`
    - `Example example.Command`
-   - `AfterApply(cfg *cmd.Config) error`
-10. Create `cmd/<project>/example/cmd.go`.
-11. Create `cmd/<project>/main_test.go`.
-12. Create `README.md`.
-13. Create `<project>.yaml`.
+   - `AfterApply(cfg *appconfig.Config) error`
+11. Create `cmd/<project>/example/cmd.go`.
+12. Create `cmd/<project>/main_test.go`.
+13. Create `README.md`.
+14. Create `<project>.yaml`.
 
 ## Design Rationale
 
 The current design is intentional.
 
 - `internal/cli` exists so future binaries can reuse parser/build-info/logger wiring.
-- `cmd/config.go` keeps app config out of `main` and available to commands.
+- `internal/appconfig` keeps app config out of `main` and out of the top-level `cmd` package while still making it available to command handlers.
 - `cmd/globals.go` holds shared CLI globals that subcommands can import directly.
 - `kong.Bind(...)` is used for shared injected objects instead of a custom `RunArgs()` abstraction.
 - config loading is explicit Go code rather than Kong’s default config loader, which keeps YAML field naming fully under app control.
@@ -403,7 +406,7 @@ The current design is intentional.
 
 If this scaffold evolves further, the likely update points are:
 
-- `cmd/config.go` if new app-wide config fields are added
+- `internal/appconfig` if new app-wide config fields are added
 - `cmd/<project>/cli.go` if new root flags or root-level overrides are added
 - `cmd/<project>/example/cmd.go` if the placeholder command changes
 - `cmd/<project>/main_test.go` if parser wiring changes

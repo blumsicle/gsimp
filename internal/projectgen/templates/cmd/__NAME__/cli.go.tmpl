@@ -4,6 +4,7 @@ import (
 	"github.com/alecthomas/kong"
 	"{{ .ModulePath }}/cmd"
 	"{{ .ModulePath }}/cmd/{{ .Name }}/example"
+	"{{ .ModulePath }}/internal/appconfig"
 	"github.com/rs/zerolog"
 )
 
@@ -16,7 +17,7 @@ type CLI struct {
 	Example example.Command `cmd:"" help:"Example subcommand for new projects"`
 }
 
-func (c *CLI) AfterApply(cfg *cmd.Config) error {
+func (c *CLI) AfterApply(cfg *appconfig.Config) error {
 	if err := cfg.LoadYAML(c.ConfigFile); err != nil {
 		return err
 	}

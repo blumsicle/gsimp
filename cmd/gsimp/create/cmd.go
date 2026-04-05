@@ -4,9 +4,9 @@ import (
 	"context"
 	"path/filepath"
 
-	"github.com/blumsicle/gsimp/cmd"
+	"github.com/blumsicle/gsimp/internal/appconfig"
+	"github.com/blumsicle/gsimp/internal/poststep"
 	"github.com/blumsicle/gsimp/internal/projectgen"
-	"github.com/blumsicle/gsimp/internal/projectgen/poststep"
 	"github.com/rs/zerolog"
 )
 
@@ -17,7 +17,7 @@ type Command struct {
 	Description string  `          help:"Description for the generated CLI"                                   arg:"" required:""`
 }
 
-func (c *Command) AfterApply(cfg *cmd.Config) error {
+func (c *Command) AfterApply(cfg *appconfig.Config) error {
 	if c.RootPath != nil {
 		cfg.RootPath = *c.RootPath
 	}
@@ -28,11 +28,11 @@ func (c *Command) AfterApply(cfg *cmd.Config) error {
 	return nil
 }
 
-func (c *Command) Run(log zerolog.Logger, cfg *cmd.Config) error {
+func (c *Command) Run(log zerolog.Logger, cfg *appconfig.Config) error {
 	gen := projectgen.New()
-	gen.AddPostStep(poststep.GoGetUpdate{})
-	gen.AddPostStep(poststep.GoModTidy{})
-	gen.AddPostStep(poststep.GitInit{})
+	for _, step := range poststep.DefaultPostSteps() {
+		gen.AddPostStep(step)
+	}
 
 	targetPath, err := gen.Generate(context.Background(), projectgen.Config{
 		Name:        c.Name,

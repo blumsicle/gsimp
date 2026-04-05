@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/blumsicle/gsimp/internal/projectgen/poststep"
+	"github.com/blumsicle/gsimp/internal/poststep"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -34,8 +34,9 @@ func TestGenerateCreatesStarterProject(t *testing.T) {
 	assert.Contains(t, string(mainGo), "name    = \"mycommand\"")
 
 	assert.FileExists(t, filepath.Join(targetPath, "mycommand.yaml"))
-	assert.FileExists(t, filepath.Join(targetPath, "cmd", "config.go"))
-	assert.FileExists(t, filepath.Join(targetPath, "cmd", "config_test.go"))
+	assert.FileExists(t, filepath.Join(targetPath, "internal", "appconfig", "config.go"))
+	assert.FileExists(t, filepath.Join(targetPath, "internal", "appconfig", "load.go"))
+	assert.FileExists(t, filepath.Join(targetPath, "internal", "appconfig", "config_test.go"))
 
 	readme, err := os.ReadFile(filepath.Join(targetPath, "README.md"))
 	require.NoError(t, err)
@@ -89,7 +90,7 @@ func TestGenerateFailsWhenTargetExists(t *testing.T) {
 type recordingPostStep struct {
 	name    string
 	ran     *bool
-	input   *poststep.Input
+	input   *poststep.PostStepInput
 	runErr  error
 	visited *[]string
 }
@@ -98,7 +99,7 @@ func (s recordingPostStep) Name() string {
 	return s.name
 }
 
-func (s recordingPostStep) Run(_ context.Context, input poststep.Input) error {
+func (s recordingPostStep) Run(_ context.Context, input poststep.PostStepInput) error {
 	if s.ran != nil {
 		*s.ran = true
 	}
@@ -115,7 +116,7 @@ func TestGenerateRunsRegisteredPostSteps(t *testing.T) {
 	rootPath := t.TempDir()
 	gen := New()
 	var ran bool
-	var input poststep.Input
+	var input poststep.PostStepInput
 	var visited []string
 	gen.AddPostStep(recordingPostStep{
 		name:    "record",

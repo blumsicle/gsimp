@@ -12,7 +12,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/blumsicle/gsimp/internal/projectgen/poststep"
+	"github.com/blumsicle/gsimp/internal/poststep"
 )
 
 //go:embed all:templates
@@ -33,17 +33,17 @@ type templateData struct {
 
 type Generator struct {
 	templateFS fs.FS
-	postSteps  []poststep.Step
+	postSteps  []poststep.PostStep
 }
 
 func New() *Generator {
 	return &Generator{
 		templateFS: templateFS,
-		postSteps:  []poststep.Step{},
+		postSteps:  []poststep.PostStep{},
 	}
 }
 
-func (g *Generator) AddPostStep(step poststep.Step) {
+func (g *Generator) AddPostStep(step poststep.PostStep) {
 	g.postSteps = append(g.postSteps, step)
 }
 
@@ -99,7 +99,7 @@ func (g *Generator) Generate(ctx context.Context, cfg Config) (string, error) {
 		}
 	}
 
-	input := poststep.Input{
+	input := poststep.PostStepInput{
 		ProjectPath: targetPath,
 		Name:        cfg.Name,
 		ModulePath:  modulePath,

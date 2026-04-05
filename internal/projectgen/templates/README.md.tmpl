@@ -38,7 +38,7 @@ The `make fmt` target expects these tools to be installed locally:
 
 ## Layout
 
-- `cmd/config.go` contains application config defaults and YAML loading.
+- `internal/appconfig` contains application config defaults, loading, and tests.
 - `cmd/<binary>` contains binary entrypoints and command wiring.
 - `cmd/globals.go` contains shared injected arguments used by command handlers.
 - `internal/cli` contains shared CLI runtime code for parsing, logging, and build metadata wiring.

@@ -1,4 +1,4 @@
-package cmd
+package appconfig
 
 import (
 	"errors"
@@ -6,22 +6,7 @@ import (
 	"os"
 
 	"github.com/goccy/go-yaml"
-	"github.com/rs/zerolog"
 )
-
-type Config struct {
-	RootPath    string        `yaml:"root_path"`
-	GitLocation string        `yaml:"git_location"`
-	LogLevel    zerolog.Level `yaml:"log_level"`
-}
-
-func DefaultConfig() *Config {
-	return &Config{
-		RootPath:    ".",
-		GitLocation: "",
-		LogLevel:    zerolog.InfoLevel,
-	}
-}
 
 func (c *Config) LoadYAML(path string) error {
 	data, err := os.ReadFile(path)

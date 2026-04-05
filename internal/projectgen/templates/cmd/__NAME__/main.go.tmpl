@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/alecthomas/kong"
-	"{{ .ModulePath }}/cmd"
+	"{{ .ModulePath }}/internal/appconfig"
 	cliutil "{{ .ModulePath }}/internal/cli"
 	"github.com/rs/zerolog"
 )
@@ -17,7 +17,7 @@ var (
 )
 
 func main() {
-	appConfig := cmd.DefaultConfig()
+	appConfig := appconfig.Default()
 	cli := &CLI{}
 	cfg := cliutil.Config{
 		Description: "{{ .Description }}",

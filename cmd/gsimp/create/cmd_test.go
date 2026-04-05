@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/blumsicle/gsimp/cmd"
+	"github.com/blumsicle/gsimp/internal/appconfig"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -22,7 +22,7 @@ func TestRunGeneratesProject(t *testing.T) {
 		Description: "CLI tool that does some cool stuff",
 	}
 
-	err := command.Run(zerolog.Nop(), &cmd.Config{
+	err := command.Run(zerolog.Nop(), &appconfig.Config{
 		RootPath:    rootPath,
 		GitLocation: gitLocation,
 	})
@@ -49,7 +49,7 @@ func TestRunGeneratesProject(t *testing.T) {
 func TestAfterApplyOverridesConfig(t *testing.T) {
 	rootPath := "/tmp/src"
 	gitLocation := "github.com/acme"
-	cfg := cmd.DefaultConfig()
+	cfg := appconfig.Default()
 
 	command := Command{
 		RootPath:    &rootPath,
