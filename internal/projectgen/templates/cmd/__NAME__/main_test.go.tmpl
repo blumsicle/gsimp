@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	"github.com/alecthomas/kong"
-	"github.com/blumsicle/gsimp/cmd"
-	cliutil "github.com/blumsicle/gsimp/internal/cli"
+	"{{ .ModulePath }}/cmd"
+	cliutil "{{ .ModulePath }}/internal/cli"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -16,9 +16,9 @@ import (
 
 func testConfig() cliutil.Config {
 	return cliutil.Config{
-		Description: "Generate starter Go CLI projects",
+		Description: "{{ .Description }}",
 		BuildInfo: cliutil.BuildInfo{
-			Name:    "gsimp",
+			Name:    "{{ .Name }}",
 			Version: "test-version",
 			Commit:  "test-commit",
 		},
@@ -63,7 +63,7 @@ func TestVersionFlag(t *testing.T) {
 	require.Error(t, err)
 
 	assert.Equal(t, 0, exitCode)
-	assert.Equal(t, "gsimp test-version test-commit\n", stdout.String())
+	assert.Equal(t, "{{ .Name }} test-version test-commit\n", stdout.String())
 	assert.Empty(t, stderr.String())
 }
 
@@ -80,13 +80,14 @@ func TestHelpFlag(t *testing.T) {
 	require.Error(t, err)
 
 	assert.Equal(t, 0, exitCode)
-	assert.Contains(t, stdout.String(), "Generate starter Go CLI projects")
+	assert.Contains(t, stdout.String(), "{{ .Description }}")
+	assert.Contains(t, stdout.String(), "--config-file")
 	assert.Contains(t, stdout.String(), "--log-level")
-	assert.Contains(t, stdout.String(), "create")
+	assert.Contains(t, stdout.String(), "example")
 	assert.Empty(t, stderr.String())
 }
 
-func TestConfigFileLoadsAndFlagsOverrideIt(t *testing.T) {
+func TestConfigFileLoadsAndFlagOverridesIt(t *testing.T) {
 	configPath := filepath.Join(t.TempDir(), "config.yaml")
 	require.NoError(
 		t,
@@ -107,24 +108,26 @@ func TestConfigFileLoadsAndFlagsOverrideIt(t *testing.T) {
 
 	parser := newTestParser(t, cli, appConfig, &stdout, &stderr, &exitCode)
 
-	flagRootPath := "/from-flag"
-	flagGitLocation := "github.com/from-flag"
 	flagLogLevel := zerolog.WarnLevel
-	_, err := parser.Parse([]string{
+	ctx, err := parser.Parse([]string{
 		"--config-file", configPath,
 		"--log-level", "warn",
-		"create",
-		"--root-path", flagRootPath,
-		"--git-location", flagGitLocation,
-		"cooltool",
-		"CLI tool that does some cool stuff",
+		"example",
 	})
 	require.NoError(t, err)
 
-	assert.Equal(t, "/from-flag", appConfig.RootPath)
-	assert.Equal(t, "github.com/from-flag", appConfig.GitLocation)
+	assert.Equal(t, "/from-config", appConfig.RootPath)
+	assert.Equal(t, "github.com/from-config", appConfig.GitLocation)
 	assert.Equal(t, flagLogLevel, appConfig.LogLevel)
+
+	var logs bytes.Buffer
+	log := zerolog.New(&logs)
+
+	err = cliutil.Run(ctx, log)
+	require.NoError(t, err)
+
 	assert.Equal(t, -1, exitCode)
-	assert.Empty(t, stdout.String())
-	assert.Empty(t, stderr.String())
+	assert.Contains(t, logs.String(), "example command")
+	assert.Contains(t, logs.String(), configPath)
+	assert.Contains(t, logs.String(), "/from-config")
 }

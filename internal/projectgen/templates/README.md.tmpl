@@ -1,0 +1,45 @@
+# {{ .Name }}
+
+{{ .Description }}
+
+Starter repo for a Go CLI tool built with Kong and zerolog.
+
+The module path is `{{ .ModulePath }}`.
+
+Configuration can be loaded from `~/.config/{{ .Name }}/config.yaml`. CLI flags override values loaded from that file.
+
+Example config:
+
+```yaml
+log_level: info
+root_path: .
+git_location: ""
+```
+
+## Common Commands
+
+- `make build` builds versioned binaries into `bin/`.
+- `make rebuild` forces a rebuild of versioned binaries.
+- `make install` installs the current CLI with embedded build metadata.
+- `make test` runs Go tests.
+- `make coverage` runs Go tests with coverage output.
+- `make coverage-html` generates an HTML coverage report.
+- `make vet` runs `go vet`.
+- `make check` runs tests and vetting together.
+- `make clean` removes built artifacts from `bin/`.
+
+## Tooling
+
+The `make fmt` target expects these tools to be installed locally:
+
+- `gofumpt`
+- `goimports`
+- `golines`
+
+## Layout
+
+- `cmd/config.go` contains application config defaults and YAML loading.
+- `cmd/<binary>` contains binary entrypoints and command wiring.
+- `cmd/globals.go` contains shared injected arguments used by command handlers.
+- `internal/cli` contains shared CLI runtime code for parsing, logging, and build metadata wiring.
+- `Makefile` handles local build, install, and verification workflows.

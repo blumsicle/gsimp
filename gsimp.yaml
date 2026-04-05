@@ -1,0 +1,12 @@
+# Example gsimp configuration.
+#
+# CLI flags override values loaded from this file.
+
+# Zerolog log level for gsimp itself.
+log_level: info
+
+# Directory to create generated projects under.
+root_path: .
+
+# Optional git host and owner prefix used for the generated module path.
+git_location: ""

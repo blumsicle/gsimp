@@ -5,13 +5,13 @@ import (
 	"time"
 
 	"github.com/alecthomas/kong"
-	"github.com/blumsicle/gsimp/cmd"
-	cliutil "github.com/blumsicle/gsimp/internal/cli"
+	"{{ .ModulePath }}/cmd"
+	cliutil "{{ .ModulePath }}/internal/cli"
 	"github.com/rs/zerolog"
 )
 
 var (
-	name    = "gsimp"
+	name    = "{{ .Name }}"
 	version = "dev"
 	commit  = "unknown"
 )
@@ -20,7 +20,7 @@ func main() {
 	appConfig := cmd.DefaultConfig()
 	cli := &CLI{}
 	cfg := cliutil.Config{
-		Description: "Generate starter Go CLI projects",
+		Description: "{{ .Description }}",
 		BuildInfo: cliutil.BuildInfo{
 			Name:    name,
 			Version: version,
