@@ -25,7 +25,12 @@ func Options(cfg Config) []kong.Option {
 		kong.Description(cfg.Description),
 		kong.ConfigureHelp(kong.HelpOptions{Compact: true}),
 		kong.Vars{
-			"version": fmt.Sprintf("%s %s %s", cfg.BuildInfo.Name, cfg.BuildInfo.Version, cfg.BuildInfo.Commit),
+			"version": fmt.Sprintf(
+				"%s %s %s",
+				cfg.BuildInfo.Name,
+				cfg.BuildInfo.Version,
+				cfg.BuildInfo.Commit,
+			),
 		},
 	}
 }

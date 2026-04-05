@@ -22,7 +22,13 @@ func testConfig() cliutil.Config {
 	}
 }
 
-func newTestParser(t *testing.T, cli *CLI, stdout *bytes.Buffer, stderr *bytes.Buffer, exitCode *int) *kong.Kong {
+func newTestParser(
+	t *testing.T,
+	cli *CLI,
+	stdout *bytes.Buffer,
+	stderr *bytes.Buffer,
+	exitCode *int,
+) *kong.Kong {
 	t.Helper()
 
 	parser, err := cliutil.New(
