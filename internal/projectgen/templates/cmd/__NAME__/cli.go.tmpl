@@ -17,7 +17,7 @@ type CLI struct {
 }
 
 func (c *CLI) AfterApply(cfg *cmd.Config) error {
-	if err := cfg.LoadYAML(c.Globals.ConfigFile); err != nil {
+	if err := cfg.LoadYAML(c.ConfigFile); err != nil {
 		return err
 	}
 

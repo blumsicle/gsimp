@@ -1,10 +1,12 @@
 package projectgen
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
 
+	"github.com/blumsicle/gsimp/internal/projectgen/poststep"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -12,7 +14,7 @@ import (
 func TestGenerateCreatesStarterProject(t *testing.T) {
 	rootPath := t.TempDir()
 
-	targetPath, err := New().Generate(Config{
+	targetPath, err := New().Generate(context.Background(), Config{
 		Name:        "mycommand",
 		Description: "CLI tool that does some cool stuff",
 		GitLocation: "github.com/blumsicle",
@@ -50,7 +52,7 @@ func TestGenerateCreatesStarterProject(t *testing.T) {
 func TestGenerateUsesProjectNameAsModulePathWhenGitLocationIsEmpty(t *testing.T) {
 	rootPath := t.TempDir()
 
-	targetPath, err := New().Generate(Config{
+	targetPath, err := New().Generate(context.Background(), Config{
 		Name:        "mycommand",
 		Description: "CLI tool that does some cool stuff",
 		RootPath:    rootPath,
@@ -74,7 +76,7 @@ func TestGenerateFailsWhenTargetExists(t *testing.T) {
 	targetPath := filepath.Join(rootPath, "mycommand")
 	require.NoError(t, os.MkdirAll(targetPath, 0o755))
 
-	_, err := New().Generate(Config{
+	_, err := New().Generate(context.Background(), Config{
 		Name:        "mycommand",
 		Description: "CLI tool that does some cool stuff",
 		GitLocation: "github.com/blumsicle",
@@ -82,4 +84,81 @@ func TestGenerateFailsWhenTargetExists(t *testing.T) {
 	})
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "target path already exists")
+}
+
+type recordingPostStep struct {
+	name    string
+	ran     *bool
+	input   *poststep.Input
+	runErr  error
+	visited *[]string
+}
+
+func (s recordingPostStep) Name() string {
+	return s.name
+}
+
+func (s recordingPostStep) Run(_ context.Context, input poststep.Input) error {
+	if s.ran != nil {
+		*s.ran = true
+	}
+	if s.input != nil {
+		*s.input = input
+	}
+	if s.visited != nil {
+		*s.visited = append(*s.visited, s.name)
+	}
+	return s.runErr
+}
+
+func TestGenerateRunsRegisteredPostSteps(t *testing.T) {
+	rootPath := t.TempDir()
+	gen := New()
+	var ran bool
+	var input poststep.Input
+	var visited []string
+	gen.AddPostStep(recordingPostStep{
+		name:    "record",
+		ran:     &ran,
+		input:   &input,
+		visited: &visited,
+	})
+
+	targetPath, err := gen.Generate(context.Background(), Config{
+		Name:        "mycommand",
+		Description: "CLI tool that does some cool stuff",
+		GitLocation: "github.com/blumsicle",
+		RootPath:    rootPath,
+	})
+	require.NoError(t, err)
+
+	assert.True(t, ran)
+	assert.Equal(t, []string{"record"}, visited)
+	assert.Equal(t, targetPath, input.ProjectPath)
+	assert.Equal(t, "mycommand", input.Name)
+	assert.Equal(t, "github.com/blumsicle/mycommand", input.ModulePath)
+}
+
+func TestGenerateStopsOnPostStepError(t *testing.T) {
+	rootPath := t.TempDir()
+	gen := New()
+	var visited []string
+	gen.AddPostStep(recordingPostStep{
+		name:    "first",
+		runErr:  assert.AnError,
+		visited: &visited,
+	})
+	gen.AddPostStep(recordingPostStep{
+		name:    "second",
+		visited: &visited,
+	})
+
+	_, err := gen.Generate(context.Background(), Config{
+		Name:        "mycommand",
+		Description: "CLI tool that does some cool stuff",
+		RootPath:    rootPath,
+	})
+	require.Error(t, err)
+	assert.ErrorContains(t, err, `run post step "first"`)
+	assert.Equal(t, []string{"first"}, visited)
 }

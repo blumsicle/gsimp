@@ -1,10 +1,12 @@
 package create
 
 import (
+	"context"
 	"path/filepath"
 
 	"github.com/blumsicle/gsimp/cmd"
 	"github.com/blumsicle/gsimp/internal/projectgen"
+	"github.com/blumsicle/gsimp/internal/projectgen/poststep"
 	"github.com/rs/zerolog"
 )
 
@@ -27,7 +29,12 @@ func (c *Command) AfterApply(cfg *cmd.Config) error {
 }
 
 func (c *Command) Run(log zerolog.Logger, cfg *cmd.Config) error {
-	targetPath, err := projectgen.New().Generate(projectgen.Config{
+	gen := projectgen.New()
+	gen.AddPostStep(poststep.GoGetUpdate{})
+	gen.AddPostStep(poststep.GoModTidy{})
+	gen.AddPostStep(poststep.GitInit{})
+
+	targetPath, err := gen.Generate(context.Background(), projectgen.Config{
 		Name:        c.Name,
 		Description: c.Description,
 		GitLocation: cfg.GitLocation,

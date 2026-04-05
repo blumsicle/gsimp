@@ -2,6 +2,7 @@ package projectgen
 
 import (
 	"bytes"
+	"context"
 	"embed"
 	"fmt"
 	"io/fs"
@@ -10,6 +11,8 @@ import (
 	"sort"
 	"strings"
 	"text/template"
+
+	"github.com/blumsicle/gsimp/internal/projectgen/poststep"
 )
 
 //go:embed all:templates
@@ -30,13 +33,21 @@ type templateData struct {
 
 type Generator struct {
 	templateFS fs.FS
+	postSteps  []poststep.Step
 }
 
 func New() *Generator {
-	return &Generator{templateFS: templateFS}
+	return &Generator{
+		templateFS: templateFS,
+		postSteps:  []poststep.Step{},
+	}
 }
 
-func (g *Generator) Generate(cfg Config) (string, error) {
+func (g *Generator) AddPostStep(step poststep.Step) {
+	g.postSteps = append(g.postSteps, step)
+}
+
+func (g *Generator) Generate(ctx context.Context, cfg Config) (string, error) {
 	if cfg.Name == "" {
 		return "", fmt.Errorf("name is required")
 	}
@@ -60,10 +71,11 @@ func (g *Generator) Generate(cfg Config) (string, error) {
 		return "", fmt.Errorf("create target directory: %w", err)
 	}
 
+	modulePath := modulePath(cfg.GitLocation, cfg.Name)
 	data := templateData{
 		Name:        cfg.Name,
 		Description: cfg.Description,
-		ModulePath:  modulePath(cfg.GitLocation, cfg.Name),
+		ModulePath:  modulePath,
 	}
 
 	templates, err := g.templatePaths()
@@ -84,6 +96,17 @@ func (g *Generator) Generate(cfg Config) (string, error) {
 		}
 		if err := os.WriteFile(fullPath, []byte(content), 0o644); err != nil {
 			return "", fmt.Errorf("write %q: %w", relativePath, err)
+		}
+	}
+
+	input := poststep.Input{
+		ProjectPath: targetPath,
+		Name:        cfg.Name,
+		ModulePath:  modulePath,
+	}
+	for _, step := range g.postSteps {
+		if err := step.Run(ctx, input); err != nil {
+			return "", fmt.Errorf("run post step %q: %w", step.Name(), err)
 		}
 	}
 

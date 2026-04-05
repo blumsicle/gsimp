@@ -41,7 +41,15 @@ The scaffold currently generates these files:
 - `internal/cli/buildinfo.go`
 - `internal/cli/runner.go`
 
-It does not generate `go.sum`. That appears after `go mod tidy`, `go test`, or another module-resolving command.
+The generator also runs post steps after writing the scaffold:
+
+- `go get -u ./...`
+- `go mod tidy`
+- `git init`
+- `git add .`
+- `git commit -m "Initial commit"`
+
+So generated projects normally include both `go.sum` and a fresh Git repository with an initial commit.
 
 ## Generated Layout
 

@@ -1,6 +1,8 @@
 package create
 
 import (
+	"os"
+	"os/exec"
 	"path/filepath"
 	"testing"
 
@@ -28,12 +30,20 @@ func TestRunGeneratesProject(t *testing.T) {
 
 	projectPath := filepath.Join(rootPath, "cooltool")
 	assert.DirExists(t, projectPath)
+	assert.DirExists(t, filepath.Join(projectPath, ".git"))
 	assert.FileExists(t, filepath.Join(projectPath, "go.mod"))
+	assert.FileExists(t, filepath.Join(projectPath, "go.sum"))
 	assert.FileExists(t, filepath.Join(projectPath, "Makefile"))
 	assert.FileExists(t, filepath.Join(projectPath, "cmd", "cooltool", "main.go"))
-	assert.FileExists(t, filepath.Join(projectPath, "cmd", "cooltool", "example", "cmd.go"))
-	assert.FileExists(t, filepath.Join(projectPath, "internal", "cli", "runner.go"))
-	assert.FileExists(t, filepath.Join(projectPath, "README.md"))
+
+	gitConfig, err := os.ReadFile(filepath.Join(projectPath, ".git", "config"))
+	require.NoError(t, err)
+	assert.Contains(t, string(gitConfig), "[core]")
+
+	commitMessage, err := exec.Command("git", "-C", projectPath, "log", "-1", "--pretty=%s").
+		CombinedOutput()
+	require.NoError(t, err, string(commitMessage))
+	assert.Equal(t, "Initial commit\n", string(commitMessage))
 }
 
 func TestAfterApplyOverridesConfig(t *testing.T) {

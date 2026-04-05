@@ -6,6 +6,8 @@ Generate starter repos for Go CLI tools built with Kong and zerolog.
 
 `gsimp create mycommand "CLI tool that does some cool stuff"` creates a new starter project in `./mycommand`.
 
+After generating the files, `gsimp` also runs post steps to update dependencies, tidy the module, initialize Git, and create an initial commit.
+
 By default the generated module path uses just the project name. Set `--git-location` or `git_location` in config if you want a fully qualified module path such as `github.com/your-org/<name>`.
 
 Use `--root-path` or `-r` to choose a different parent directory:
