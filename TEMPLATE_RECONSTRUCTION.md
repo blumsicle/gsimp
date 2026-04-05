@@ -227,7 +227,7 @@ Current hook:
 
 Current `AfterApply` behavior:
 
-1. call `cfg.LoadYAML(c.Globals.ConfigFile)`
+1. call `cfg.LoadYAML(c.ConfigFile)`
 2. if `--log-level` was provided, override `cfg.LogLevel`
 
 The use of `*zerolog.Level` is intentional so Kong can distinguish:

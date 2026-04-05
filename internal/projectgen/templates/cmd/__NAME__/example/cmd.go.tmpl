@@ -1,3 +1,4 @@
+// Package example contains a placeholder subcommand for new projects.
 package example
 
 import (
@@ -6,8 +7,10 @@ import (
 	"github.com/rs/zerolog"
 )
 
+// Command is a placeholder subcommand implementation.
 type Command struct{}
 
+// Run demonstrates how shared globals and app config are injected into handlers.
 func (c *Command) Run(log zerolog.Logger, g *cmd.Globals, cfg *appconfig.Config) error {
 	log.Info().
 		Str("config_file", g.ConfigFile).

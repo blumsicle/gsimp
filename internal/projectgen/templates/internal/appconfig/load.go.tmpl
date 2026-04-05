@@ -1,3 +1,4 @@
+// Package appconfig defines application configuration defaults and schema.
 package appconfig
 
 import (
@@ -8,6 +9,7 @@ import (
 	"github.com/goccy/go-yaml"
 )
 
+// LoadYAML merges YAML configuration from path into the config.
 func (c *Config) LoadYAML(path string) error {
 	data, err := os.ReadFile(path)
 	if err != nil {

@@ -1,3 +1,4 @@
+// Package projectgen renders starter project scaffolds from embedded templates.
 package projectgen
 
 import (
@@ -18,6 +19,7 @@ import (
 //go:embed all:templates
 var templateFS embed.FS
 
+// Config defines the inputs used to generate a new project scaffold.
 type Config struct {
 	Name        string
 	Description string
@@ -31,11 +33,13 @@ type templateData struct {
 	ModulePath  string
 }
 
+// Generator renders embedded project templates and runs post-generation steps.
 type Generator struct {
 	templateFS fs.FS
 	postSteps  []poststep.PostStep
 }
 
+// New constructs a generator with the embedded template filesystem.
 func New() *Generator {
 	return &Generator{
 		templateFS: templateFS,
@@ -43,10 +47,12 @@ func New() *Generator {
 	}
 }
 
+// AddPostStep appends a post-generation step to be run after rendering completes.
 func (g *Generator) AddPostStep(step poststep.PostStep) {
 	g.postSteps = append(g.postSteps, step)
 }
 
+// Generate renders the scaffold into the target directory and runs post steps.
 func (g *Generator) Generate(ctx context.Context, cfg Config) (string, error) {
 	if cfg.Name == "" {
 		return "", fmt.Errorf("name is required")

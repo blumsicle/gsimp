@@ -1,3 +1,4 @@
+// Package main defines the root command-line interface for {{ .Name }}.
 package main
 
 import (
@@ -8,6 +9,7 @@ import (
 	"github.com/rs/zerolog"
 )
 
+// CLI defines the root command tree for the {{ .Name }} binary.
 type CLI struct {
 	cmd.Globals
 
@@ -17,6 +19,7 @@ type CLI struct {
 	Example example.Command `cmd:"" help:"Example subcommand for new projects"`
 }
 
+// AfterApply loads file-backed config and applies root flag overrides.
 func (c *CLI) AfterApply(cfg *appconfig.Config) error {
 	if err := cfg.LoadYAML(c.ConfigFile); err != nil {
 		return err

@@ -1,3 +1,4 @@
+// Package main defines the gsimp command-line interface.
 package main
 
 import (
@@ -8,6 +9,7 @@ import (
 	"github.com/rs/zerolog"
 )
 
+// CLI defines the root command tree for the gsimp generator.
 type CLI struct {
 	cmd.Globals
 
@@ -17,6 +19,7 @@ type CLI struct {
 	Create create.Command `cmd:"" help:"Create a new Go CLI starter project"`
 }
 
+// AfterApply loads file-backed config and applies root flag overrides.
 func (c *CLI) AfterApply(cfg *appconfig.Config) error {
 	if err := cfg.LoadYAML(c.ConfigFile); err != nil {
 		return err

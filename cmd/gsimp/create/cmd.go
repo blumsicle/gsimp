@@ -1,3 +1,4 @@
+// Package create implements the gsimp create subcommand.
 package create
 
 import (
@@ -10,6 +11,7 @@ import (
 	"github.com/rs/zerolog"
 )
 
+// Command creates a new starter CLI project.
 type Command struct {
 	RootPath    *string `short:"r" help:"Directory to create the new project under"               type:"path"`
 	GitLocation *string `short:"g" help:"Git host and owner prefix for the generated module path"`
@@ -17,6 +19,7 @@ type Command struct {
 	Description string  `          help:"Description for the generated CLI"                                   arg:"" required:""`
 }
 
+// AfterApply applies command-specific flag overrides to the shared app config.
 func (c *Command) AfterApply(cfg *appconfig.Config) error {
 	if c.RootPath != nil {
 		cfg.RootPath = *c.RootPath
@@ -28,6 +31,7 @@ func (c *Command) AfterApply(cfg *appconfig.Config) error {
 	return nil
 }
 
+// Run generates the project scaffold and executes the configured post steps.
 func (c *Command) Run(log zerolog.Logger, cfg *appconfig.Config) error {
 	gen := projectgen.New()
 	for _, step := range poststep.DefaultPostSteps() {
