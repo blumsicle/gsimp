@@ -58,12 +58,19 @@ func Parse(app any, cfg Config, options ...kong.Option) *kong.Context {
 func NewLogger(level zerolog.Level) zerolog.Logger {
 	cw := zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.DateTime + " MST"}
 
-	return zerolog.New(cw).
-		Level(level).
-		With().
-		Timestamp().
-		Str("logger", "main").
-		Logger()
+	return SubLogger(
+		zerolog.New(cw).
+			Level(level).
+			With().
+			Timestamp().
+			Logger(),
+		"main",
+	)
+}
+
+// SubLogger returns a logger rebound to the provided subsystem name.
+func SubLogger(log zerolog.Logger, subsystem string) zerolog.Logger {
+	return log.With().Str("logger", subsystem).Logger()
 }
 
 // Run executes the selected Kong command with the shared logger injected first.

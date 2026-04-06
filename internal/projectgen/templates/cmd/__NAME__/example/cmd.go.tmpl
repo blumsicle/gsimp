@@ -4,6 +4,7 @@ package example
 import (
 	"{{ .ModulePath }}/cmd"
 	"{{ .ModulePath }}/internal/appconfig"
+	cliutil "{{ .ModulePath }}/internal/cli"
 	"github.com/rs/zerolog"
 )
 
@@ -12,6 +13,8 @@ type Command struct{}
 
 // Run demonstrates how shared globals and app config are injected into handlers.
 func (c *Command) Run(log zerolog.Logger, g *cmd.Globals, cfg *appconfig.Config) error {
+	log = cliutil.SubLogger(log, "example")
+
 	log.Info().
 		Str("config_file", g.ConfigFile).
 		Str("root_path", cfg.RootPath).

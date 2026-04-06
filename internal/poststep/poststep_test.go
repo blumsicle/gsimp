@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/blumsicle/gsimp/internal/appconfig"
+	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -27,7 +28,7 @@ func TestGoGetUpdatePostStepRunsExpectedCommand(t *testing.T) {
 		args []string
 	)
 	previousRun := run
-	run = func(_ context.Context, gotDir string, gotName string, gotArgs ...string) error {
+	run = func(_ context.Context, _ zerolog.Logger, gotDir string, gotName string, gotArgs ...string) error {
 		dir = gotDir
 		name = gotName
 		args = gotArgs
@@ -37,7 +38,7 @@ func TestGoGetUpdatePostStepRunsExpectedCommand(t *testing.T) {
 		run = previousRun
 	})
 
-	err := GoGetUpdatePostStep{}.Run(
+	err := GoGetUpdatePostStep{log: zerolog.Nop()}.Run(
 		context.Background(),
 		PostStepInput{ProjectPath: "/tmp/project"},
 	)
@@ -55,7 +56,7 @@ func TestGoModTidyPostStepRunsExpectedCommand(t *testing.T) {
 		args []string
 	)
 	previousRun := run
-	run = func(_ context.Context, gotDir string, gotName string, gotArgs ...string) error {
+	run = func(_ context.Context, _ zerolog.Logger, gotDir string, gotName string, gotArgs ...string) error {
 		dir = gotDir
 		name = gotName
 		args = gotArgs
@@ -65,7 +66,10 @@ func TestGoModTidyPostStepRunsExpectedCommand(t *testing.T) {
 		run = previousRun
 	})
 
-	err := GoModTidyPostStep{}.Run(context.Background(), PostStepInput{ProjectPath: "/tmp/project"})
+	err := GoModTidyPostStep{log: zerolog.Nop()}.Run(
+		context.Background(),
+		PostStepInput{ProjectPath: "/tmp/project"},
+	)
 	require.NoError(t, err)
 
 	assert.Equal(t, "/tmp/project", dir)
@@ -78,7 +82,7 @@ func TestPlannedDisablesGitCommitWhenGitInitIsDisabled(t *testing.T) {
 	cfg.PostSteps.GitInit = false
 	cfg.PostSteps.GitCommit = true
 
-	steps := Planned(cfg)
+	steps := NewPlanner(zerolog.Nop(), &cfg.PostSteps).Planned()
 
 	require.Len(t, steps, 2)
 	assert.Equal(
@@ -91,7 +95,7 @@ func TestPlannedDisablesGitCommitWhenGitInitIsDisabled(t *testing.T) {
 func TestGitInitPostStepRunsExpectedCommand(t *testing.T) {
 	var calls [][]string
 	previousRun := run
-	run = func(_ context.Context, gotDir string, gotName string, gotArgs ...string) error {
+	run = func(_ context.Context, _ zerolog.Logger, gotDir string, gotName string, gotArgs ...string) error {
 		call := []string{gotDir, gotName}
 		call = append(call, gotArgs...)
 		calls = append(calls, call)
@@ -101,7 +105,10 @@ func TestGitInitPostStepRunsExpectedCommand(t *testing.T) {
 		run = previousRun
 	})
 
-	err := GitInitPostStep{}.Run(context.Background(), PostStepInput{ProjectPath: "/tmp/project"})
+	err := GitInitPostStep{log: zerolog.Nop()}.Run(
+		context.Background(),
+		PostStepInput{ProjectPath: "/tmp/project"},
+	)
 	require.NoError(t, err)
 
 	assert.Equal(
@@ -116,7 +123,7 @@ func TestGitInitPostStepRunsExpectedCommand(t *testing.T) {
 func TestGitCommitPostStepRunsExpectedCommandsInOrder(t *testing.T) {
 	var calls [][]string
 	previousRun := run
-	run = func(_ context.Context, gotDir string, gotName string, gotArgs ...string) error {
+	run = func(_ context.Context, _ zerolog.Logger, gotDir string, gotName string, gotArgs ...string) error {
 		call := []string{gotDir, gotName}
 		call = append(call, gotArgs...)
 		calls = append(calls, call)
@@ -126,7 +133,10 @@ func TestGitCommitPostStepRunsExpectedCommandsInOrder(t *testing.T) {
 		run = previousRun
 	})
 
-	err := GitCommitPostStep{}.Run(context.Background(), PostStepInput{ProjectPath: "/tmp/project"})
+	err := GitCommitPostStep{log: zerolog.Nop()}.Run(
+		context.Background(),
+		PostStepInput{ProjectPath: "/tmp/project"},
+	)
 	require.NoError(t, err)
 
 	assert.Equal(
@@ -143,7 +153,7 @@ func TestGitInitPostStepStopsOnError(t *testing.T) {
 	expectedErr := errors.New("boom")
 	var calls int
 	previousRun := run
-	run = func(_ context.Context, _ string, _ string, _ ...string) error {
+	run = func(_ context.Context, _ zerolog.Logger, _ string, _ string, _ ...string) error {
 		calls++
 		return expectedErr
 	}
@@ -151,7 +161,10 @@ func TestGitInitPostStepStopsOnError(t *testing.T) {
 		run = previousRun
 	})
 
-	err := GitInitPostStep{}.Run(context.Background(), PostStepInput{ProjectPath: "/tmp/project"})
+	err := GitInitPostStep{log: zerolog.Nop()}.Run(
+		context.Background(),
+		PostStepInput{ProjectPath: "/tmp/project"},
+	)
 	require.ErrorIs(t, err, expectedErr)
 	assert.Equal(t, 1, calls)
 }
@@ -160,7 +173,7 @@ func TestGitCommitPostStepStopsOnError(t *testing.T) {
 	expectedErr := errors.New("boom")
 	var calls int
 	previousRun := run
-	run = func(_ context.Context, _ string, _ string, _ ...string) error {
+	run = func(_ context.Context, _ zerolog.Logger, _ string, _ string, _ ...string) error {
 		calls++
 		return expectedErr
 	}
@@ -168,7 +181,10 @@ func TestGitCommitPostStepStopsOnError(t *testing.T) {
 		run = previousRun
 	})
 
-	err := GitCommitPostStep{}.Run(context.Background(), PostStepInput{ProjectPath: "/tmp/project"})
+	err := GitCommitPostStep{log: zerolog.Nop()}.Run(
+		context.Background(),
+		PostStepInput{ProjectPath: "/tmp/project"},
+	)
 	require.ErrorIs(t, err, expectedErr)
 	assert.Equal(t, 1, calls)
 }

@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/blumsicle/gsimp/internal/poststep"
+	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -14,7 +15,7 @@ import (
 func TestGenerateCreatesStarterProject(t *testing.T) {
 	rootPath := t.TempDir()
 
-	targetPath, err := New().Generate(context.Background(), Config{
+	targetPath, err := New(zerolog.Nop()).Generate(context.Background(), Config{
 		Name:        "mycommand",
 		Description: "CLI tool that does some cool stuff",
 		GitLocation: "github.com/blumsicle",
@@ -53,7 +54,7 @@ func TestGenerateCreatesStarterProject(t *testing.T) {
 func TestGenerateUsesProjectNameAsModulePathWhenGitLocationIsEmpty(t *testing.T) {
 	rootPath := t.TempDir()
 
-	targetPath, err := New().Generate(context.Background(), Config{
+	targetPath, err := New(zerolog.Nop()).Generate(context.Background(), Config{
 		Name:        "mycommand",
 		Description: "CLI tool that does some cool stuff",
 		RootPath:    rootPath,
@@ -77,7 +78,7 @@ func TestGenerateFailsWhenTargetExists(t *testing.T) {
 	targetPath := filepath.Join(rootPath, "mycommand")
 	require.NoError(t, os.MkdirAll(targetPath, 0o755))
 
-	_, err := New().Generate(context.Background(), Config{
+	_, err := New(zerolog.Nop()).Generate(context.Background(), Config{
 		Name:        "mycommand",
 		Description: "CLI tool that does some cool stuff",
 		GitLocation: "github.com/blumsicle",
@@ -114,7 +115,7 @@ func (s recordingPostStep) Run(_ context.Context, input poststep.PostStepInput) 
 
 func TestGenerateRunsRegisteredPostSteps(t *testing.T) {
 	rootPath := t.TempDir()
-	gen := New()
+	gen := New(zerolog.Nop())
 	var ran bool
 	var input poststep.PostStepInput
 	var visited []string
@@ -142,7 +143,7 @@ func TestGenerateRunsRegisteredPostSteps(t *testing.T) {
 
 func TestGenerateStopsOnPostStepError(t *testing.T) {
 	rootPath := t.TempDir()
-	gen := New()
+	gen := New(zerolog.Nop())
 	var visited []string
 	gen.AddPostStep(recordingPostStep{
 		name:    "first",

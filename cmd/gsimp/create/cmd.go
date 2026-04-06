@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/blumsicle/gsimp/internal/appconfig"
+	cliutil "github.com/blumsicle/gsimp/internal/cli"
 	"github.com/blumsicle/gsimp/internal/poststep"
 	"github.com/blumsicle/gsimp/internal/projectgen"
 	"github.com/rs/zerolog"
@@ -49,8 +50,17 @@ func (c *Command) AfterApply(cfg *appconfig.Config) error {
 
 // Run generates the project scaffold and executes the configured post steps.
 func (c *Command) Run(log zerolog.Logger, cfg *appconfig.Config) error {
-	gen := projectgen.New()
-	for _, step := range poststep.Planned(cfg) {
+	log = cliutil.SubLogger(log, "create")
+	log.Debug().
+		Bool("go_get_update", cfg.PostSteps.GoGetUpdate).
+		Bool("go_mod_tidy", cfg.PostSteps.GoModTidy).
+		Bool("git_init", cfg.PostSteps.GitInit).
+		Bool("git_commit", cfg.PostSteps.GitCommit).
+		Msg("resolved create command configuration")
+
+	gen := projectgen.New(log)
+	planner := poststep.NewPlanner(log, &cfg.PostSteps)
+	for _, step := range planner.Planned() {
 		gen.AddPostStep(step)
 	}
 
@@ -67,7 +77,7 @@ func (c *Command) Run(log zerolog.Logger, cfg *appconfig.Config) error {
 	log.Info().
 		Str("project", c.Name).
 		Str("path", filepath.Clean(targetPath)).
-		Msg("created project")
+		Msg("created project scaffold")
 
 	return nil
 }

@@ -13,7 +13,9 @@ import (
 	"strings"
 	"text/template"
 
+	cliutil "github.com/blumsicle/gsimp/internal/cli"
 	"github.com/blumsicle/gsimp/internal/poststep"
+	"github.com/rs/zerolog"
 )
 
 //go:embed all:templates
@@ -37,18 +39,21 @@ type templateData struct {
 type Generator struct {
 	templateFS fs.FS
 	postSteps  []poststep.PostStep
+	log        zerolog.Logger
 }
 
 // New constructs a generator with the embedded template filesystem.
-func New() *Generator {
+func New(log zerolog.Logger) *Generator {
 	return &Generator{
 		templateFS: templateFS,
 		postSteps:  []poststep.PostStep{},
+		log:        cliutil.SubLogger(log, "projectgen"),
 	}
 }
 
 // AddPostStep appends a post-generation step to be run after rendering completes.
 func (g *Generator) AddPostStep(step poststep.PostStep) {
+	g.log.Debug().Str("step", step.Name()).Msg("registered post step")
 	g.postSteps = append(g.postSteps, step)
 }
 
@@ -67,6 +72,12 @@ func (g *Generator) Generate(ctx context.Context, cfg Config) (string, error) {
 	}
 
 	targetPath := filepath.Join(rootPath, cfg.Name)
+	g.log.Info().
+		Str("name", cfg.Name).
+		Str("root_path", filepath.Clean(rootPath)).
+		Str("target_path", filepath.Clean(targetPath)).
+		Msg("starting project generation")
+
 	if _, err := os.Stat(targetPath); err == nil {
 		return "", fmt.Errorf("target path already exists: %s", targetPath)
 	} else if !os.IsNotExist(err) {
@@ -78,6 +89,10 @@ func (g *Generator) Generate(ctx context.Context, cfg Config) (string, error) {
 	}
 
 	modulePath := modulePath(cfg.GitLocation, cfg.Name)
+	g.log.Debug().
+		Str("name", cfg.Name).
+		Str("module_path", modulePath).
+		Msg("resolved module path")
 	data := templateData{
 		Name:        cfg.Name,
 		Description: cfg.Description,
@@ -88,9 +103,14 @@ func (g *Generator) Generate(ctx context.Context, cfg Config) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	g.log.Debug().Int("count", len(templates)).Msg("discovered templates")
 
 	for _, templatePath := range templates {
 		relativePath := outputPath(templatePath, data)
+		g.log.Debug().
+			Str("template", templatePath).
+			Str("output_path", relativePath).
+			Msg("rendering template")
 		content, err := g.renderTemplate(templatePath, data)
 		if err != nil {
 			return "", fmt.Errorf("render file %q: %w", relativePath, err)
@@ -111,10 +131,16 @@ func (g *Generator) Generate(ctx context.Context, cfg Config) (string, error) {
 		ModulePath:  modulePath,
 	}
 	for _, step := range g.postSteps {
+		g.log.Info().Str("step", step.Name()).Msg("running post step")
 		if err := step.Run(ctx, input); err != nil {
 			return "", fmt.Errorf("run post step %q: %w", step.Name(), err)
 		}
 	}
+
+	g.log.Info().
+		Str("name", cfg.Name).
+		Str("target_path", filepath.Clean(targetPath)).
+		Msg("finished project generation")
 
 	return targetPath, nil
 }
