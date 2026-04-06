@@ -61,7 +61,12 @@ if [[ -n "${invalid_changes}" ]]; then
 	exit 1
 fi
 
-if git diff --quiet -- RELEASE_NOTES.md && git diff --cached --quiet -- RELEASE_NOTES.md; then
+notes_tracked=true
+if ! git ls-files --error-unmatch RELEASE_NOTES.md >/dev/null 2>&1; then
+	notes_tracked=false
+fi
+
+if [[ "${notes_tracked}" == true ]] && git diff --quiet -- RELEASE_NOTES.md && git diff --cached --quiet -- RELEASE_NOTES.md; then
 	echo "RELEASE_NOTES.md must contain changes before creating a release" >&2
 	exit 1
 fi
