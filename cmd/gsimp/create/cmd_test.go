@@ -12,7 +12,17 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func setTestGitIdentity(t *testing.T) {
+	t.Helper()
+	t.Setenv("GIT_AUTHOR_NAME", "gsimp test")
+	t.Setenv("GIT_AUTHOR_EMAIL", "gsimp-test@example.com")
+	t.Setenv("GIT_COMMITTER_NAME", "gsimp test")
+	t.Setenv("GIT_COMMITTER_EMAIL", "gsimp-test@example.com")
+}
+
 func TestRunGeneratesProject(t *testing.T) {
+	setTestGitIdentity(t)
+
 	rootPath := t.TempDir()
 	gitLocation := "github.com/blumsicle"
 	command := Command{
@@ -48,6 +58,8 @@ func TestRunGeneratesProject(t *testing.T) {
 }
 
 func TestRunSkipsGitPostStepsWhenGitInitIsDisabled(t *testing.T) {
+	setTestGitIdentity(t)
+
 	rootPath := t.TempDir()
 	gitLocation := "github.com/blumsicle"
 	command := Command{
@@ -70,6 +82,8 @@ func TestRunSkipsGitPostStepsWhenGitInitIsDisabled(t *testing.T) {
 }
 
 func TestRunSkipsInitialCommitWhenGitCommitIsDisabled(t *testing.T) {
+	setTestGitIdentity(t)
+
 	rootPath := t.TempDir()
 	gitLocation := "github.com/blumsicle"
 	command := Command{
