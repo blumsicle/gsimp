@@ -167,6 +167,7 @@ Defines:
 - `func New(app any, cfg Config, options ...kong.Option) (*kong.Kong, error)`
 - `func Parse(app any, cfg Config, options ...kong.Option) *kong.Context`
 - `func NewLogger(level zerolog.Level) zerolog.Logger`
+- `func SubLogger(log zerolog.Logger, subsystem string) zerolog.Logger`
 - `func Run(ctx *kong.Context, log zerolog.Logger, args ...any) error`
 
 Important runtime behavior:
@@ -175,7 +176,8 @@ Important runtime behavior:
 - `Parse` parses `os.Args[1:]`
 - `Parse` calls `parser.FatalIfErrorf(err)` on parse failure
 - `NewLogger` returns a console logger writing to `os.Stderr`
-- the returned logger has `.Level(level)`, timestamp, and `logger=main`
+- `NewLogger` returns the base logger rebound through `SubLogger(..., "main")`
+- `SubLogger` returns a logger with the `logger` field rebound to the provided subsystem name
 - `Run` prepends the logger to `ctx.Run(...)`
 
 ## Root Binary Structure
@@ -249,6 +251,7 @@ Current handler signature:
 
 Current behavior:
 
+- rebinds the injected logger with `cliutil.SubLogger(log, "example")`
 - logs `example command`
 - includes `config_file`
 - includes `root_path`

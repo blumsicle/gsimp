@@ -43,6 +43,15 @@ Tests use Go’s built-in `testing` package. Keep tests adjacent to the code the
 
 Some post-step tests invoke `go` and `git` in temporary directories. Preserve that behavior when refactoring.
 
+## Release Process
+
+When asked to create a release, write or update a descriptive `RELEASE_NOTES.md` manually rather than auto-generating a minimal changelog. Then run `golangci-lint run ./...`, `make fmt`, and `make test` before tagging. Use `scripts/release.sh --no-ask vX.Y.Z` after `RELEASE_NOTES.md` is already updated in the worktree; the script stages `RELEASE_NOTES.md`, creates the release commit, creates an annotated tag, and pushes both the branch and tag to `origin`.
+
+When run manually without `--no-ask`, `scripts/release.sh` prompts for confirmation that `RELEASE_NOTES.md` was updated before proceeding.
+
+The GitHub Actions workflow at `.github/workflows/release.yml` publishes releases for pushed `v*` tags. It runs tests, builds the `darwin/arm64` `gsimp` binary, and creates the GitHub release using `RELEASE_NOTES.md` from the tagged commit as the release body.
+GitHub repository settings must allow workflow `contents: write` permissions for the release job to create GitHub releases successfully.
+
 ## Commit & Pull Request Guidelines
 
 Recent commits use short, imperative subjects such as `Add project generation post steps` and `Refactor generator config and post step packages`. Keep commit titles concise and descriptive.
