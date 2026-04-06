@@ -5,6 +5,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/blumsicle/gsimp/internal/appconfig"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -12,10 +13,11 @@ import (
 func TestDefaultPostSteps(t *testing.T) {
 	steps := DefaultPostSteps()
 
-	require.Len(t, steps, 3)
+	require.Len(t, steps, 4)
 	assert.IsType(t, GoGetUpdatePostStep{}, steps[0])
 	assert.IsType(t, GoModTidyPostStep{}, steps[1])
 	assert.IsType(t, GitInitPostStep{}, steps[2])
+	assert.IsType(t, GitCommitPostStep{}, steps[3])
 }
 
 func TestGoGetUpdatePostStepRunsExpectedCommand(t *testing.T) {
@@ -71,7 +73,22 @@ func TestGoModTidyPostStepRunsExpectedCommand(t *testing.T) {
 	assert.Equal(t, []string{"mod", "tidy"}, args)
 }
 
-func TestGitInitPostStepRunsExpectedCommandsInOrder(t *testing.T) {
+func TestPlannedDisablesGitCommitWhenGitInitIsDisabled(t *testing.T) {
+	cfg := appconfig.Default()
+	cfg.PostSteps.GitInit = false
+	cfg.PostSteps.GitCommit = true
+
+	steps := Planned(cfg)
+
+	require.Len(t, steps, 2)
+	assert.Equal(
+		t,
+		[]string{"go get -u ./...", "go mod tidy"},
+		[]string{steps[0].Name(), steps[1].Name()},
+	)
+}
+
+func TestGitInitPostStepRunsExpectedCommand(t *testing.T) {
 	var calls [][]string
 	previousRun := run
 	run = func(_ context.Context, gotDir string, gotName string, gotArgs ...string) error {
@@ -91,6 +108,30 @@ func TestGitInitPostStepRunsExpectedCommandsInOrder(t *testing.T) {
 		t,
 		[][]string{
 			{"/tmp/project", "git", "init"},
+		},
+		calls,
+	)
+}
+
+func TestGitCommitPostStepRunsExpectedCommandsInOrder(t *testing.T) {
+	var calls [][]string
+	previousRun := run
+	run = func(_ context.Context, gotDir string, gotName string, gotArgs ...string) error {
+		call := []string{gotDir, gotName}
+		call = append(call, gotArgs...)
+		calls = append(calls, call)
+		return nil
+	}
+	t.Cleanup(func() {
+		run = previousRun
+	})
+
+	err := GitCommitPostStep{}.Run(context.Background(), PostStepInput{ProjectPath: "/tmp/project"})
+	require.NoError(t, err)
+
+	assert.Equal(
+		t,
+		[][]string{
 			{"/tmp/project", "git", "add", "."},
 			{"/tmp/project", "git", "commit", "-m", "Initial commit"},
 		},
@@ -111,6 +152,23 @@ func TestGitInitPostStepStopsOnError(t *testing.T) {
 	})
 
 	err := GitInitPostStep{}.Run(context.Background(), PostStepInput{ProjectPath: "/tmp/project"})
+	require.ErrorIs(t, err, expectedErr)
+	assert.Equal(t, 1, calls)
+}
+
+func TestGitCommitPostStepStopsOnError(t *testing.T) {
+	expectedErr := errors.New("boom")
+	var calls int
+	previousRun := run
+	run = func(_ context.Context, _ string, _ string, _ ...string) error {
+		calls++
+		return expectedErr
+	}
+	t.Cleanup(func() {
+		run = previousRun
+	})
+
+	err := GitCommitPostStep{}.Run(context.Background(), PostStepInput{ProjectPath: "/tmp/project"})
 	require.ErrorIs(t, err, expectedErr)
 	assert.Equal(t, 1, calls)
 }

@@ -22,10 +22,11 @@ func TestRunGeneratesProject(t *testing.T) {
 		Description: "CLI tool that does some cool stuff",
 	}
 
-	err := command.Run(zerolog.Nop(), &appconfig.Config{
-		RootPath:    rootPath,
-		GitLocation: gitLocation,
-	})
+	cfg := appconfig.Default()
+	cfg.RootPath = rootPath
+	cfg.GitLocation = gitLocation
+
+	err := command.Run(zerolog.Nop(), cfg)
 	require.NoError(t, err)
 
 	projectPath := filepath.Join(rootPath, "cooltool")
@@ -46,14 +47,63 @@ func TestRunGeneratesProject(t *testing.T) {
 	assert.Equal(t, "Initial commit\n", string(commitMessage))
 }
 
+func TestRunSkipsGitPostStepsWhenGitInitIsDisabled(t *testing.T) {
+	rootPath := t.TempDir()
+	gitLocation := "github.com/blumsicle"
+	command := Command{
+		Name:        "cooltool",
+		Description: "CLI tool that does some cool stuff",
+	}
+
+	cfg := appconfig.Default()
+	cfg.RootPath = rootPath
+	cfg.GitLocation = gitLocation
+	cfg.PostSteps.GitInit = false
+	cfg.PostSteps.GitCommit = true
+
+	err := command.Run(zerolog.Nop(), cfg)
+	require.NoError(t, err)
+
+	projectPath := filepath.Join(rootPath, "cooltool")
+	assert.DirExists(t, projectPath)
+	assert.NoDirExists(t, filepath.Join(projectPath, ".git"))
+}
+
+func TestRunSkipsInitialCommitWhenGitCommitIsDisabled(t *testing.T) {
+	rootPath := t.TempDir()
+	gitLocation := "github.com/blumsicle"
+	command := Command{
+		Name:        "cooltool",
+		Description: "CLI tool that does some cool stuff",
+	}
+
+	cfg := appconfig.Default()
+	cfg.RootPath = rootPath
+	cfg.GitLocation = gitLocation
+	cfg.PostSteps.GitCommit = false
+
+	err := command.Run(zerolog.Nop(), cfg)
+	require.NoError(t, err)
+
+	projectPath := filepath.Join(rootPath, "cooltool")
+	assert.DirExists(t, filepath.Join(projectPath, ".git"))
+
+	commitCheck := exec.Command("git", "-C", projectPath, "rev-parse", "--verify", "HEAD")
+	output, err := commitCheck.CombinedOutput()
+	require.Error(t, err)
+	assert.Contains(t, string(output), "Needed a single revision")
+}
+
 func TestAfterApplyOverridesConfig(t *testing.T) {
 	rootPath := "/tmp/src"
 	gitLocation := "github.com/acme"
 	cfg := appconfig.Default()
 
 	command := Command{
-		RootPath:    &rootPath,
-		GitLocation: &gitLocation,
+		RootPath:      &rootPath,
+		GitLocation:   &gitLocation,
+		NoGoGetUpdate: true,
+		NoGitInit:     true,
 	}
 
 	err := command.AfterApply(cfg)
@@ -61,4 +111,8 @@ func TestAfterApplyOverridesConfig(t *testing.T) {
 
 	assert.Equal(t, "/tmp/src", cfg.RootPath)
 	assert.Equal(t, "github.com/acme", cfg.GitLocation)
+	assert.False(t, cfg.PostSteps.GoGetUpdate)
+	assert.True(t, cfg.PostSteps.GoModTidy)
+	assert.False(t, cfg.PostSteps.GitInit)
+	assert.True(t, cfg.PostSteps.GitCommit)
 }

@@ -10,3 +10,10 @@ root_path: .
 
 # Optional git host and owner prefix used for the generated module path.
 git_location: ""
+
+# Optional post-generation step toggles.
+post_steps:
+  go_get_update: true
+  go_mod_tidy: true
+  git_init: true
+  git_commit: true
