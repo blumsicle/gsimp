@@ -4,6 +4,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/blumsicle/bcli/internal/appconfig"
 	cliutil "github.com/blumsicle/bcli/internal/cli"
@@ -39,6 +40,9 @@ func (c *Command) Run(log zerolog.Logger, cfg *appconfig.Config) (err error) {
 
 	output := os.Stdout
 	if c.Output != "" && c.Output != "-" {
+		if err := os.MkdirAll(filepath.Dir(c.Output), 0o755); err != nil {
+			return fmt.Errorf("create parent directory for config file: %w", err)
+		}
 		file, err := os.Create(c.Output)
 		if err != nil {
 			return fmt.Errorf("create config file: %w", err)

@@ -8,6 +8,9 @@ log_level: info
 # Directory to create generated projects under.
 root_path: .
 
+# Optional prefix added to the generated project directory name.
+project_dir_prefix: ""
+
 # Optional git host and owner prefix used for the generated module path.
 git_location: ""
 

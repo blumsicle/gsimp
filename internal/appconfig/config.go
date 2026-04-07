@@ -13,18 +13,20 @@ type PostStepsConfig struct {
 
 // Config contains app-wide settings loaded from defaults, YAML, and CLI overrides.
 type Config struct {
-	RootPath    string          `yaml:"root_path"`
-	GitLocation string          `yaml:"git_location"`
-	LogLevel    zerolog.Level   `yaml:"log_level"`
-	PostSteps   PostStepsConfig `yaml:"post_steps"`
+	RootPath         string          `yaml:"root_path"`
+	ProjectDirPrefix string          `yaml:"project_dir_prefix"`
+	GitLocation      string          `yaml:"git_location"`
+	LogLevel         zerolog.Level   `yaml:"log_level"`
+	PostSteps        PostStepsConfig `yaml:"post_steps"`
 }
 
 // Default returns a config initialized with built-in defaults.
 func Default() *Config {
 	return &Config{
-		RootPath:    ".",
-		GitLocation: "",
-		LogLevel:    zerolog.InfoLevel,
+		RootPath:         ".",
+		ProjectDirPrefix: "",
+		GitLocation:      "",
+		LogLevel:         zerolog.InfoLevel,
 		PostSteps: PostStepsConfig{
 			GoGetUpdate: true,
 			GoModTidy:   true,

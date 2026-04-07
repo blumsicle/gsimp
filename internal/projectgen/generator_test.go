@@ -16,18 +16,20 @@ func TestGenerateCreatesStarterProject(t *testing.T) {
 	rootPath := t.TempDir()
 
 	targetPath, err := New(zerolog.Nop()).Generate(context.Background(), Config{
-		Name:        "mycommand",
-		Description: "CLI tool that does some cool stuff",
-		GitLocation: "github.com/blumsicle",
-		RootPath:    rootPath,
+		Name:             "mycommand",
+		Description:      "CLI tool that does some cool stuff",
+		GitLocation:      "github.com/blumsicle",
+		ProjectDirPrefix: "generated-",
+		RootPath:         rootPath,
 	})
 	require.NoError(t, err)
 
-	require.Equal(t, filepath.Join(rootPath, "mycommand"), targetPath)
+	require.Equal(t, filepath.Join(rootPath, "generated-mycommand"), targetPath)
 
 	goMod, err := os.ReadFile(filepath.Join(targetPath, "go.mod"))
 	require.NoError(t, err)
 	assert.Contains(t, string(goMod), "module github.com/blumsicle/mycommand")
+	assert.Contains(t, string(goMod), "go "+currentGoVersion())
 
 	mainGo, err := os.ReadFile(filepath.Join(targetPath, "cmd", "mycommand", "main.go"))
 	require.NoError(t, err)
@@ -65,6 +67,29 @@ func TestGenerateCreatesStarterProject(t *testing.T) {
 	)
 	require.NoError(t, err)
 	assert.Contains(t, string(exampleCmd), "\"github.com/blumsicle/mycommand/cmd\"")
+}
+
+func TestGenerateUsesProjectDirPrefixOnlyForTargetPath(t *testing.T) {
+	rootPath := t.TempDir()
+
+	targetPath, err := New(zerolog.Nop()).Generate(context.Background(), Config{
+		Name:             "mycommand",
+		Description:      "CLI tool that does some cool stuff",
+		GitLocation:      "github.com/blumsicle",
+		ProjectDirPrefix: "generated-",
+		RootPath:         rootPath,
+	})
+	require.NoError(t, err)
+
+	require.Equal(t, filepath.Join(rootPath, "generated-mycommand"), targetPath)
+
+	goMod, err := os.ReadFile(filepath.Join(targetPath, "go.mod"))
+	require.NoError(t, err)
+	assert.Contains(t, string(goMod), "module github.com/blumsicle/mycommand")
+
+	mainGo, err := os.ReadFile(filepath.Join(targetPath, "cmd", "mycommand", "main.go"))
+	require.NoError(t, err)
+	assert.Contains(t, string(mainGo), `const name = "mycommand"`)
 }
 
 func TestGenerateUsesProjectNameAsModulePathWhenGitLocationIsEmpty(t *testing.T) {

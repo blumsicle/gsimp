@@ -8,7 +8,9 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 	"text/template"
@@ -23,16 +25,18 @@ var templateFS embed.FS
 
 // Config defines the inputs used to generate a new project scaffold.
 type Config struct {
-	Name        string
-	Description string
-	GitLocation string
-	RootPath    string
+	Name             string
+	Description      string
+	GitLocation      string
+	ProjectDirPrefix string
+	RootPath         string
 }
 
 type templateData struct {
 	Name        string
 	Description string
 	ModulePath  string
+	GoVersion   string
 }
 
 // Generator renders embedded project templates and runs post-generation steps.
@@ -71,9 +75,10 @@ func (g *Generator) Generate(ctx context.Context, cfg Config) (string, error) {
 		rootPath = "."
 	}
 
-	targetPath := filepath.Join(rootPath, cfg.Name)
+	targetPath := filepath.Join(rootPath, cfg.ProjectDirPrefix+cfg.Name)
 	g.log.Info().
 		Str("name", cfg.Name).
+		Str("project_dir_prefix", cfg.ProjectDirPrefix).
 		Str("root_path", filepath.Clean(rootPath)).
 		Str("target_path", filepath.Clean(targetPath)).
 		Msg("starting project generation")
@@ -89,14 +94,17 @@ func (g *Generator) Generate(ctx context.Context, cfg Config) (string, error) {
 	}
 
 	modulePath := modulePath(cfg.GitLocation, cfg.Name)
+	goVersion := currentGoVersion()
 	g.log.Debug().
 		Str("name", cfg.Name).
 		Str("module_path", modulePath).
+		Str("go_version", goVersion).
 		Msg("resolved module path")
 	data := templateData{
 		Name:        cfg.Name,
 		Description: cfg.Description,
 		ModulePath:  modulePath,
+		GoVersion:   goVersion,
 	}
 
 	templates, err := g.templatePaths()
@@ -206,4 +214,17 @@ func modulePath(gitLocation string, name string) string {
 		return name
 	}
 	return gitLocation + "/" + name
+}
+
+func currentGoVersion() string {
+	version, err := exec.Command("go", "env", "GOVERSION").Output()
+	if err == nil {
+		goVersion := strings.TrimSpace(string(version))
+		goVersion = strings.TrimPrefix(goVersion, "go")
+		if goVersion != "" {
+			return goVersion
+		}
+	}
+
+	return strings.TrimPrefix(runtime.Version(), "go")
 }

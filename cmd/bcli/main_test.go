@@ -95,7 +95,7 @@ func TestConfigFileLoadsAndFlagsOverrideIt(t *testing.T) {
 		os.WriteFile(
 			configPath,
 			[]byte(
-				"root_path: /from-config\ngit_location: github.com/from-config\nlog_level: debug\n",
+				"root_path: /from-config\nproject_dir_prefix: from-config-\ngit_location: github.com/from-config\nlog_level: debug\n",
 			),
 			0o644,
 		),
@@ -110,6 +110,7 @@ func TestConfigFileLoadsAndFlagsOverrideIt(t *testing.T) {
 	parser := newTestParser(t, cli, appConfig, &stdout, &stderr, &exitCode)
 
 	flagRootPath := "/from-flag"
+	flagProjectDirPrefix := "from-flag-"
 	flagGitLocation := "github.com/from-flag"
 	flagLogLevel := zerolog.WarnLevel
 	_, err := parser.Parse([]string{
@@ -117,6 +118,7 @@ func TestConfigFileLoadsAndFlagsOverrideIt(t *testing.T) {
 		"--log-level", "warn",
 		"create",
 		"--root-path", flagRootPath,
+		"--project-dir-prefix", flagProjectDirPrefix,
 		"--git-location", flagGitLocation,
 		"cooltool",
 		"CLI tool that does some cool stuff",
@@ -124,6 +126,7 @@ func TestConfigFileLoadsAndFlagsOverrideIt(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, "/from-flag", appConfig.RootPath)
+	assert.Equal(t, "from-flag-", appConfig.ProjectDirPrefix)
 	assert.Equal(t, "github.com/from-flag", appConfig.GitLocation)
 	assert.Equal(t, flagLogLevel, appConfig.LogLevel)
 	assert.Equal(t, -1, exitCode)

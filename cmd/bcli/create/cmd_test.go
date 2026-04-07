@@ -25,21 +25,24 @@ func TestRunGeneratesProject(t *testing.T) {
 
 	rootPath := t.TempDir()
 	gitLocation := "github.com/blumsicle"
+	projectDirPrefix := "generated-"
 	command := Command{
-		RootPath:    &rootPath,
-		GitLocation: &gitLocation,
-		Name:        "cooltool",
-		Description: "CLI tool that does some cool stuff",
+		RootPath:         &rootPath,
+		ProjectDirPrefix: &projectDirPrefix,
+		GitLocation:      &gitLocation,
+		Name:             "cooltool",
+		Description:      "CLI tool that does some cool stuff",
 	}
 
 	cfg := appconfig.Default()
 	cfg.RootPath = rootPath
+	cfg.ProjectDirPrefix = projectDirPrefix
 	cfg.GitLocation = gitLocation
 
 	err := command.Run(zerolog.Nop(), cfg)
 	require.NoError(t, err)
 
-	projectPath := filepath.Join(rootPath, "cooltool")
+	projectPath := filepath.Join(rootPath, "generated-cooltool")
 	assert.DirExists(t, projectPath)
 	assert.DirExists(t, filepath.Join(projectPath, ".git"))
 	assert.FileExists(t, filepath.Join(projectPath, "go.mod"))
@@ -110,20 +113,23 @@ func TestRunSkipsInitialCommitWhenGitCommitIsDisabled(t *testing.T) {
 
 func TestAfterApplyOverridesConfig(t *testing.T) {
 	rootPath := "/tmp/src"
+	projectDirPrefix := "generated-"
 	gitLocation := "github.com/acme"
 	cfg := appconfig.Default()
 
 	command := Command{
-		RootPath:      &rootPath,
-		GitLocation:   &gitLocation,
-		NoGoGetUpdate: true,
-		NoGitInit:     true,
+		RootPath:         &rootPath,
+		ProjectDirPrefix: &projectDirPrefix,
+		GitLocation:      &gitLocation,
+		NoGoGetUpdate:    true,
+		NoGitInit:        true,
 	}
 
 	err := command.AfterApply(cfg)
 	require.NoError(t, err)
 
 	assert.Equal(t, "/tmp/src", cfg.RootPath)
+	assert.Equal(t, "generated-", cfg.ProjectDirPrefix)
 	assert.Equal(t, "github.com/acme", cfg.GitLocation)
 	assert.False(t, cfg.PostSteps.GoGetUpdate)
 	assert.True(t, cfg.PostSteps.GoModTidy)

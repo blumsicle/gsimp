@@ -1,5 +1,22 @@
 # Release Notes
 
+## v0.2.2 - 2026-04-07
+
+Adds more flexible project output path handling in `create` and improves file output behavior in `config`.
+
+### Highlights
+
+- Added `project_dir_prefix` config support for `bcli create`.
+- Added `--project-dir-prefix` and short flag `-p` to prepend a string to the generated project directory name without changing the project name used inside the scaffold.
+- Updated project generation so the directory prefix only affects the target path, not the generated module path, package names, or binary name.
+- Updated `bcli config --output` to create missing parent directories before writing the output file.
+- Updated sample config and repository documentation to describe the new create-path option and config output behavior.
+
+### Notes
+
+- The default `project_dir_prefix` is an empty string, so existing `bcli create` behavior is unchanged unless the option is set.
+- This remains a `0.x` release, so generated output and command surface may still evolve before a `v1.0.0` stability commitment.
+
 ## v0.2.1 - 2026-04-07
 
 Refines build metadata reporting so installed binaries and generated projects report more useful version information without relying on linker flags.

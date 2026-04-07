@@ -69,3 +69,21 @@ func TestRunWritesResolvedConfigToFile(t *testing.T) {
 	require.NoError(t, yaml.Unmarshal(data, &got))
 	assert.Equal(t, *cfg, got)
 }
+
+func TestRunCreatesParentDirectoriesForOutputFile(t *testing.T) {
+	outputPath := filepath.Join(t.TempDir(), "nested", "dir", "resolved.yaml")
+	command := Command{Output: outputPath}
+	cfg := appconfig.Default()
+	cfg.RootPath = "/tmp/src"
+	cfg.GitLocation = "github.com/acme"
+
+	err := command.Run(zerolog.Nop(), cfg)
+	require.NoError(t, err)
+
+	data, err := os.ReadFile(outputPath)
+	require.NoError(t, err)
+
+	var got appconfig.Config
+	require.NoError(t, yaml.Unmarshal(data, &got))
+	assert.Equal(t, *cfg, got)
+}

@@ -14,6 +14,10 @@ Use `--root-path` or `-r` to choose a different parent directory:
 
 `bcli create --root-path ~/src mycommand "CLI tool that does some cool stuff"`
 
+Use `--project-dir-prefix`, `-p`, or `project_dir_prefix` in config to prepend a string to the generated directory name without changing the project name used inside the scaffold:
+
+`bcli create -p local- mycommand "CLI tool that does some cool stuff"`
+
 Use `--git-location` or `-g` to change the repository prefix used in the generated `go.mod`:
 
 `bcli create --git-location github.com/your-org mycommand "CLI tool that does some cool stuff"`
@@ -23,6 +27,7 @@ Configuration can also be loaded from the file pointed to by `--config-file`. Th
 ```yaml
 log_level: info
 root_path: ~/src
+project_dir_prefix: ""
 git_location: ""
 post_steps:
   go_get_update: true
@@ -47,12 +52,15 @@ By default, `bcli config` writes YAML to stdout. Use `--output` or `-o` to write
 
 `bcli config --output /tmp/bcli-resolved.yaml`
 
+If the parent directories in the `--output` path do not exist, `bcli config` creates them before writing the file.
+
 The generated project includes:
 
 - a thin `main`
 - shared app config in `internal/appconfig`
 - shared CLI runtime code under `internal/cli`
 - shared injected args in `cmd/globals.go` with a default config path under `~/.config/<project>/`
+- a `go.mod` whose `go` version matches the locally available Go toolchain used to run `bcli`
 - a `<project>.yaml` example config file
 - an example subcommand
 - a Makefile with build, rebuild, test, vet, check, and clean targets

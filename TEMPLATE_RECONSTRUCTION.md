@@ -71,6 +71,11 @@ Why this split exists:
 
 The generated `go.mod` is based on the same versions used in this repo.
 
+The generated `go` directive is taken from the locally available Go toolchain that runs `bcli`:
+
+- `go env GOVERSION` is used when available
+- if that lookup fails, `runtime.Version()` is used as a fallback
+
 Current direct requirements:
 
 - `github.com/alecthomas/kong v1.15.0`

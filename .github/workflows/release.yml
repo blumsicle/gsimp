@@ -34,7 +34,6 @@ jobs:
         run: |
           mkdir -p dist
           go build \
-            -ldflags="-X main.name=bcli -X main.version=${GITHUB_REF_NAME} -X main.commit=${GITHUB_SHA::7} -s -w" \
             -o dist/bcli-darwin-arm64 \
             ./cmd/bcli
 
