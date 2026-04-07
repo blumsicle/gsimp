@@ -2,7 +2,7 @@
 
 ## v0.2.2 - 2026-04-07
 
-Adds more flexible project output path handling in `create` and improves file output behavior in `config`.
+Adds more flexible project output path handling in `create` and improves file output behavior in `config`, along with a generated `go.mod` update that follows the local Go toolchain.
 
 ### Highlights
 
