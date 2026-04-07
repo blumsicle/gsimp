@@ -1,5 +1,22 @@
 # Release Notes
 
+## v0.2.1 - 2026-04-07
+
+Refines build metadata reporting so installed binaries and generated projects report more useful version information without relying on linker flags.
+
+### Highlights
+
+- Added runtime build-info fallback in `internal/cli` so `go install github.com/blumsicle/bcli/cmd/bcli@latest` can report module and VCS metadata when available.
+- Shortened runtime fallback commit display to a 7-character revision.
+- Simplified binary entrypoints and generated templates so build metadata resolution only requires an explicit CLI name.
+- Removed Makefile linker flag injection for name, version, and commit in favor of runtime build metadata resolution.
+- Updated generator documentation and repository guidance to match the current metadata and documentation-update workflow.
+
+### Notes
+
+- Local builds without embedded module or VCS metadata still fall back to `dev` and `unknown`.
+- This remains a `0.x` release, so generated output and command surface may still evolve before a `v1.0.0` stability commitment.
+
 ## v0.2.0 - 2026-04-07
 
 Adds a resolved-config inspection command and finishes the remaining rename cleanup after the `bcli` transition.
