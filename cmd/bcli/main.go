@@ -21,11 +21,7 @@ func main() {
 	cli := &CLI{}
 	cfg := cliutil.Config{
 		Description: "Generate starter Go CLI projects",
-		BuildInfo: cliutil.BuildInfo{
-			Name:    name,
-			Version: version,
-			Commit:  commit,
-		},
+		BuildInfo:   cliutil.ResolveBuildInfo(name, version, commit),
 	}
 
 	ctx := cliutil.Parse(

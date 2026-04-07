@@ -21,11 +21,7 @@ func main() {
 	cli := &CLI{}
 	cfg := cliutil.Config{
 		Description: "{{ .Description }}",
-		BuildInfo: cliutil.BuildInfo{
-			Name:    name,
-			Version: version,
-			Commit:  commit,
-		},
+		BuildInfo:   cliutil.ResolveBuildInfo(name, version, commit),
 	}
 
 	ctx := cliutil.Parse(cli, cfg, kong.Bind(&cli.Globals), kong.Bind(appConfig))
