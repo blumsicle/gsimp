@@ -1,5 +1,22 @@
 # Release Notes
 
+## v0.2.0 - 2026-04-07
+
+Adds a resolved-config inspection command and finishes the remaining rename cleanup after the `bcli` transition.
+
+### Highlights
+
+- Added `bcli config` to print the fully resolved config as YAML after defaults and config-file loading are applied.
+- Added `--output` / `-o` to `bcli config` so resolved YAML can be written to a file instead of stdout.
+- Added command-level debug and info logging for the `config` subcommand.
+- Finished the remaining `gsimp` to `bcli` rename cleanup in config-related tests.
+- Updated repository docs to describe the new command and current generated-template behavior.
+
+### Notes
+
+- The `config` command outputs resolved YAML from the in-memory config model; it does not preserve comments or blank lines from the source config file.
+- This remains a `0.x` release, so generated output and command surface may still evolve before a `v1.0.0` stability commitment.
+
 ## v0.1.0 - 2026-04-06
 
 First public release of `bcli`.
