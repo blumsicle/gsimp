@@ -4,6 +4,12 @@
 
 `bcli` is a Go CLI generator. The main entrypoint lives in `cmd/bcli`, with the `create` subcommand under `cmd/bcli/create`. Shared CLI globals are in `cmd/globals.go`.
 
+Repository identity:
+
+- GitHub repo: `github.com/blumsicle/bcli`
+- Go module: `github.com/blumsicle/bcli`
+- Current local checkout path: `/Users/blumsicle/src/go/bcli`
+
 Core packages live under `internal/`:
 
 - `internal/appconfig`: config defaults, YAML loading, and config tests
