@@ -49,14 +49,14 @@ func TestLoadYAMLOverridesDefaults(t *testing.T) {
 }
 
 func TestLoadYAMLExpandsEnvironmentVariables(t *testing.T) {
-	t.Setenv("PROJECT_TEST_HOME", "/tmp/home")
+	t.Setenv("{{ upper .Name }}_TEST_HOME", "/tmp/home")
 
 	configPath := filepath.Join(t.TempDir(), "config.yaml")
 	require.NoError(
 		t,
 		os.WriteFile(
 			configPath,
-			[]byte("root_path: $PROJECT_TEST_HOME/src\ngit_location: github.com/acme\n"),
+			[]byte("root_path: ${{ upper .Name }}_TEST_HOME/src\ngit_location: github.com/acme\n"),
 			0o644,
 		),
 	)

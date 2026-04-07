@@ -176,7 +176,11 @@ func (g *Generator) renderTemplate(path string, data templateData) (string, erro
 		return "", err
 	}
 
-	tmpl, err := template.New(filepath.Base(path)).Parse(string(raw))
+	tmpl, err := template.New(filepath.Base(path)).
+		Funcs(template.FuncMap{
+			"upper": strings.ToUpper,
+		}).
+		Parse(string(raw))
 	if err != nil {
 		return "", err
 	}
