@@ -39,6 +39,14 @@ Precedence is:
 2. YAML config file
 3. explicit CLI flags
 
+Use `bcli config` to inspect the fully resolved config after defaults and YAML file loading have been applied:
+
+`bcli config`
+
+By default, `bcli config` writes YAML to stdout. Use `--output` or `-o` to write it to a file instead:
+
+`bcli config --output /tmp/bcli-resolved.yaml`
+
 The generated project includes:
 
 - a thin `main`
@@ -52,6 +60,7 @@ The generated project includes:
 
 ## Common Commands
 
+- `bcli config` writes the resolved config as YAML to stdout or a file.
 - `make build` builds versioned binaries into `bin/`.
 - `make rebuild` forces a rebuild of versioned binaries.
 - `make install` installs the current CLI with embedded build metadata.

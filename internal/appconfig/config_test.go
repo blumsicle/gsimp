@@ -68,14 +68,14 @@ func TestLoadYAMLOverridesDefaults(t *testing.T) {
 }
 
 func TestLoadYAMLExpandsEnvironmentVariables(t *testing.T) {
-	t.Setenv("GSIMP_TEST_HOME", "/tmp/home")
+	t.Setenv("BCLI_TEST_HOME", "/tmp/home")
 
 	configPath := filepath.Join(t.TempDir(), "config.yaml")
 	require.NoError(
 		t,
 		os.WriteFile(
 			configPath,
-			[]byte("root_path: $GSIMP_TEST_HOME/src\ngit_location: github.com/acme\n"),
+			[]byte("root_path: $BCLI_TEST_HOME/src\ngit_location: github.com/acme\n"),
 			0o644,
 		),
 	)

@@ -350,6 +350,14 @@ Covers:
 - YAML overrides defaults
 - environment variable expansion after YAML load
 
+The environment variable expansion test uses an uppercase project-derived variable name:
+
+- `<PROJECT>_TEST_HOME`
+
+For example, a generated project named `mycommand` uses:
+
+- `MYCOMMAND_TEST_HOME`
+
 ### `cmd/<project>/main_test.go`
 
 Covers:

@@ -9,6 +9,7 @@ import (
 	"github.com/alecthomas/kong"
 	"github.com/blumsicle/bcli/internal/appconfig"
 	cliutil "github.com/blumsicle/bcli/internal/cli"
+	"github.com/goccy/go-yaml"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -82,6 +83,7 @@ func TestHelpFlag(t *testing.T) {
 	assert.Equal(t, 0, exitCode)
 	assert.Contains(t, stdout.String(), "Generate starter Go CLI projects")
 	assert.Contains(t, stdout.String(), "--log-level")
+	assert.Contains(t, stdout.String(), "config")
 	assert.Contains(t, stdout.String(), "create")
 	assert.Empty(t, stderr.String())
 }
@@ -126,5 +128,54 @@ func TestConfigFileLoadsAndFlagsOverrideIt(t *testing.T) {
 	assert.Equal(t, flagLogLevel, appConfig.LogLevel)
 	assert.Equal(t, -1, exitCode)
 	assert.Empty(t, stdout.String())
+	assert.Empty(t, stderr.String())
+}
+
+func TestConfigCommandWritesMergedConfigToFile(t *testing.T) {
+	configPath := filepath.Join(t.TempDir(), "config.yaml")
+	outputPath := filepath.Join(t.TempDir(), "resolved.yaml")
+	require.NoError(
+		t,
+		os.WriteFile(
+			configPath,
+			[]byte(
+				"root_path: /from-config\ngit_location: github.com/from-config\npost_steps:\n  git_commit: false\n",
+			),
+			0o644,
+		),
+	)
+
+	cli := &CLI{}
+	appConfig := appconfig.Default()
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	exitCode := -1
+
+	parser := newTestParser(t, cli, appConfig, &stdout, &stderr, &exitCode)
+
+	ctx, err := parser.Parse([]string{
+		"--config-file", configPath,
+		"config",
+		"--output", outputPath,
+	})
+	require.NoError(t, err)
+
+	log := zerolog.New(&bytes.Buffer{})
+	err = cliutil.Run(ctx, log)
+	require.NoError(t, err)
+
+	data, err := os.ReadFile(outputPath)
+	require.NoError(t, err)
+
+	var got appconfig.Config
+	require.NoError(t, yaml.Unmarshal(data, &got))
+	assert.Equal(t, "/from-config", got.RootPath)
+	assert.Equal(t, "github.com/from-config", got.GitLocation)
+	assert.Equal(t, zerolog.InfoLevel, got.LogLevel)
+	assert.True(t, got.PostSteps.GoGetUpdate)
+	assert.True(t, got.PostSteps.GoModTidy)
+	assert.True(t, got.PostSteps.GitInit)
+	assert.False(t, got.PostSteps.GitCommit)
+	assert.Equal(t, -1, exitCode)
 	assert.Empty(t, stderr.String())
 }
