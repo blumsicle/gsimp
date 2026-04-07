@@ -3,19 +3,26 @@ package cli
 
 import "runtime/debug"
 
-// BuildInfo describes linker-injected metadata for a CLI binary.
+const shortCommitLength = 7
+
+const (
+	defaultVersion = "dev"
+	defaultCommit  = "unknown"
+)
+
+// BuildInfo describes resolved build metadata for a CLI binary.
 type BuildInfo struct {
 	Name    string
 	Version string
 	Commit  string
 }
 
-// ResolveBuildInfo returns build metadata from ldflags with runtime build info fallbacks.
-func ResolveBuildInfo(name string, version string, commit string) BuildInfo {
+// ResolveBuildInfo returns build metadata with runtime build info fallbacks.
+func ResolveBuildInfo(name string) BuildInfo {
 	info := BuildInfo{
 		Name:    name,
-		Version: version,
-		Commit:  commit,
+		Version: defaultVersion,
+		Commit:  defaultCommit,
 	}
 
 	buildInfo, ok := debug.ReadBuildInfo()
@@ -27,19 +34,27 @@ func ResolveBuildInfo(name string, version string, commit string) BuildInfo {
 }
 
 func applyRuntimeBuildInfo(info BuildInfo, buildInfo debug.BuildInfo) BuildInfo {
-	if (info.Version == "" || info.Version == "dev") &&
+	if (info.Version == "" || info.Version == defaultVersion) &&
 		buildInfo.Main.Version != "" &&
 		buildInfo.Main.Version != "(devel)" {
 		info.Version = buildInfo.Main.Version
 	}
 
-	if info.Commit == "" || info.Commit == "unknown" {
+	if info.Commit == "" || info.Commit == defaultCommit {
 		if revision := buildSetting(buildInfo.Settings, "vcs.revision"); revision != "" {
-			info.Commit = revision
+			info.Commit = shortCommit(revision)
 		}
 	}
 
 	return info
+}
+
+func shortCommit(revision string) string {
+	if len(revision) <= shortCommitLength {
+		return revision
+	}
+
+	return revision[:shortCommitLength]
 }
 
 func buildSetting(settings []debug.BuildSetting, key string) string {

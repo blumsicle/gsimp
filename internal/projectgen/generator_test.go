@@ -32,11 +32,11 @@ func TestGenerateCreatesStarterProject(t *testing.T) {
 	mainGo, err := os.ReadFile(filepath.Join(targetPath, "cmd", "mycommand", "main.go"))
 	require.NoError(t, err)
 	assert.Contains(t, string(mainGo), "Description: \"CLI tool that does some cool stuff\"")
-	assert.Contains(t, string(mainGo), "name    = \"mycommand\"")
+	assert.Contains(t, string(mainGo), "const name = \"mycommand\"")
 	assert.Contains(
 		t,
 		string(mainGo),
-		"BuildInfo:   cliutil.ResolveBuildInfo(name, version, commit),",
+		"BuildInfo:   cliutil.ResolveBuildInfo(name),",
 	)
 
 	assert.FileExists(t, filepath.Join(targetPath, "mycommand.yaml"))

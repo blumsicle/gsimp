@@ -10,18 +10,14 @@ import (
 	"github.com/rs/zerolog"
 )
 
-var (
-	name    = "{{ .Name }}"
-	version = "dev"
-	commit  = "unknown"
-)
+const name = "{{ .Name }}"
 
 func main() {
 	appConfig := appconfig.Default()
 	cli := &CLI{}
 	cfg := cliutil.Config{
 		Description: "{{ .Description }}",
-		BuildInfo:   cliutil.ResolveBuildInfo(name, version, commit),
+		BuildInfo:   cliutil.ResolveBuildInfo(name),
 	}
 
 	ctx := cliutil.Parse(cli, cfg, kong.Bind(&cli.Globals), kong.Bind(appConfig))

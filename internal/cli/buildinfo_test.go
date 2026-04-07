@@ -11,8 +11,8 @@ func TestApplyRuntimeBuildInfoUsesRuntimeVersionAndCommitFallbacks(t *testing.T)
 	info := applyRuntimeBuildInfo(
 		BuildInfo{
 			Name:    "bcli",
-			Version: "dev",
-			Commit:  "unknown",
+			Version: defaultVersion,
+			Commit:  defaultCommit,
 		},
 		debug.BuildInfo{
 			Main: debug.Module{
@@ -26,7 +26,7 @@ func TestApplyRuntimeBuildInfoUsesRuntimeVersionAndCommitFallbacks(t *testing.T)
 
 	assert.Equal(t, "bcli", info.Name)
 	assert.Equal(t, "v0.2.0", info.Version)
-	assert.Equal(t, "abcdef123456", info.Commit)
+	assert.Equal(t, "abcdef1", info.Commit)
 }
 
 func TestApplyRuntimeBuildInfoKeepsExplicitLdflagValues(t *testing.T) {
@@ -54,8 +54,8 @@ func TestApplyRuntimeBuildInfoIgnoresDevelVersion(t *testing.T) {
 	info := applyRuntimeBuildInfo(
 		BuildInfo{
 			Name:    "bcli",
-			Version: "dev",
-			Commit:  "unknown",
+			Version: defaultVersion,
+			Commit:  defaultCommit,
 		},
 		debug.BuildInfo{
 			Main: debug.Module{
@@ -64,6 +64,23 @@ func TestApplyRuntimeBuildInfoIgnoresDevelVersion(t *testing.T) {
 		},
 	)
 
-	assert.Equal(t, "dev", info.Version)
-	assert.Equal(t, "unknown", info.Commit)
+	assert.Equal(t, defaultVersion, info.Version)
+	assert.Equal(t, defaultCommit, info.Commit)
+}
+
+func TestApplyRuntimeBuildInfoKeepsShortRevision(t *testing.T) {
+	info := applyRuntimeBuildInfo(
+		BuildInfo{
+			Name:    "bcli",
+			Version: defaultVersion,
+			Commit:  defaultCommit,
+		},
+		debug.BuildInfo{
+			Settings: []debug.BuildSetting{
+				{Key: "vcs.revision", Value: "abc123"},
+			},
+		},
+	)
+
+	assert.Equal(t, "abc123", info.Commit)
 }

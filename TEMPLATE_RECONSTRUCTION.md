@@ -12,7 +12,7 @@ The generated project is a Go CLI starter with these goals:
 - centralize parser and logger wiring in a reusable internal package
 - keep app config explicit and typed
 - support YAML config plus CLI flag overrides
-- support linker-injected build metadata
+- support runtime-resolved build metadata
 - provide a Makefile with standard local workflows
 - include smoke tests for the CLI wiring most likely to break
 
@@ -188,10 +188,7 @@ The generated binary lives in `cmd/<project>`.
 
 Responsibilities:
 
-- define linker-overridable build vars:
-  - `name`
-  - `version`
-  - `commit`
+- define the binary name as a `const`
 - create `appConfig := appconfig.Default()`
 - create the root CLI struct
 - build the shared CLI runtime config
@@ -290,17 +287,18 @@ That file is an example artifact for users, separate from the default config pat
 
 ## Build Metadata
 
-The generated binary uses linker-injected vars in package `main`:
+The generated binary defines the CLI name in package `main`:
 
 - `name`
-- `version`
-- `commit`
 
-The Makefile sets them with:
+Runtime metadata is resolved through `internal/cli.ResolveBuildInfo(...)`.
 
-- `-X main.name=$(NAME)`
-- `-X main.version=$(VERSION)`
-- `-X main.commit=$(COMMIT)`
+Current behavior:
+
+- `ResolveBuildInfo(name)` starts from defaults of `version = "dev"` and `commit = "unknown"`
+- if Go embeds module or VCS build info, `ResolveBuildInfo(...)` uses that as a fallback
+- VCS revisions from runtime build info are shortened to 7 characters
+- this improves version reporting for installs such as `go install <module>/cmd/<binary>@latest`
 
 ## Makefile
 
@@ -380,7 +378,7 @@ This mirrors the production wiring in `main.go`.
 If recreating this scaffold from scratch in a new repo, the sequence is:
 
 1. Create `go.mod` with the dependency versions listed above.
-2. Create the Makefile with the targets and linker-flag behavior described above.
+2. Create the Makefile with the targets and versioned binary naming behavior described above.
 3. Create `internal/appconfig/config.go` with `Config` and `Default()`.
 4. Create `internal/appconfig/load.go` with `LoadYAML(path)`.
 5. Create `internal/appconfig/config_test.go` with the config-loading tests.

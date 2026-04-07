@@ -10,18 +10,14 @@ import (
 	"github.com/rs/zerolog"
 )
 
-var (
-	name    = "bcli"
-	version = "dev"
-	commit  = "unknown"
-)
+const name = "bcli"
 
 func main() {
 	appConfig := appconfig.Default()
 	cli := &CLI{}
 	cfg := cliutil.Config{
 		Description: "Generate starter Go CLI projects",
-		BuildInfo:   cliutil.ResolveBuildInfo(name, version, commit),
+		BuildInfo:   cliutil.ResolveBuildInfo(name),
 	}
 
 	ctx := cliutil.Parse(

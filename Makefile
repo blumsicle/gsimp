@@ -7,13 +7,8 @@ APP_NAMES := $(notdir $(patsubst %/,%,$(dir $(wildcard cmd/*/main.go))))
 RELEASE_VERSION := $(shell git describe --tags --exact-match 2>/dev/null)
 DEV_VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 VERSION ?= $(if $(RELEASE_VERSION),$(RELEASE_VERSION),$(DEV_VERSION))
-COMMIT := $(shell git rev-parse --short HEAD)
 
 NAME = $(patsubst %-$(VERSION),%,$(@F))
-LDFLAGS ?= '-X main.name=$(NAME) \
-		   -X main.version=$(VERSION) \
-		   -X main.commit=$(COMMIT) \
-		   -s -w'
 
 SRC_PATH = ./cmd/$(NAME)
 DEST_PATHS = $(addprefix bin/,$(addsuffix -$(VERSION),$(APP_NAMES)))
@@ -28,10 +23,10 @@ rebuild:
 	$(MAKE) -B build
 
 $(APP_NAMES):
-	$(GO) install -ldflags $(LDFLAGS) $(SRC_PATH)
+	$(GO) install $(SRC_PATH)
 
 $(DEST_PATHS):
-	$(GO) build -ldflags $(LDFLAGS) -o $@ $(SRC_PATH)
+	$(GO) build -o $@ $(SRC_PATH)
 
 generate:
 	$(GO) generate ./...

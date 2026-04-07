@@ -63,7 +63,7 @@ The generated project includes:
 - `bcli config` writes the resolved config as YAML to stdout or a file.
 - `make build` builds versioned binaries into `bin/`.
 - `make rebuild` forces a rebuild of versioned binaries.
-- `make install` installs the current CLI with embedded build metadata.
+- `make install` installs the current CLI.
 - `make test` runs Go tests.
 - `make coverage` runs Go tests with coverage output.
 - `make coverage-html` generates an HTML coverage report.
