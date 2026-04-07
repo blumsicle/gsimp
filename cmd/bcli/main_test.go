@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	"github.com/alecthomas/kong"
-	"github.com/blumsicle/gsimp/internal/appconfig"
-	cliutil "github.com/blumsicle/gsimp/internal/cli"
+	"github.com/blumsicle/bcli/internal/appconfig"
+	cliutil "github.com/blumsicle/bcli/internal/cli"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -18,7 +18,7 @@ func testConfig() cliutil.Config {
 	return cliutil.Config{
 		Description: "Generate starter Go CLI projects",
 		BuildInfo: cliutil.BuildInfo{
-			Name:    "gsimp",
+			Name:    "bcli",
 			Version: "test-version",
 			Commit:  "test-commit",
 		},
@@ -63,7 +63,7 @@ func TestVersionFlag(t *testing.T) {
 	require.Error(t, err)
 
 	assert.Equal(t, 0, exitCode)
-	assert.Equal(t, "gsimp test-version test-commit\n", stdout.String())
+	assert.Equal(t, "bcli test-version test-commit\n", stdout.String())
 	assert.Empty(t, stderr.String())
 }
 

@@ -1,14 +1,14 @@
-// Package create implements the gsimp create subcommand.
+// Package create implements the bcli create subcommand.
 package create
 
 import (
 	"context"
 	"path/filepath"
 
-	"github.com/blumsicle/gsimp/internal/appconfig"
-	cliutil "github.com/blumsicle/gsimp/internal/cli"
-	"github.com/blumsicle/gsimp/internal/poststep"
-	"github.com/blumsicle/gsimp/internal/projectgen"
+	"github.com/blumsicle/bcli/internal/appconfig"
+	cliutil "github.com/blumsicle/bcli/internal/cli"
+	"github.com/blumsicle/bcli/internal/poststep"
+	"github.com/blumsicle/bcli/internal/projectgen"
 	"github.com/rs/zerolog"
 )
 

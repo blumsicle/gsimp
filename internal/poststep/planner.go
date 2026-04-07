@@ -2,8 +2,8 @@
 package poststep
 
 import (
-	"github.com/blumsicle/gsimp/internal/appconfig"
-	cliutil "github.com/blumsicle/gsimp/internal/cli"
+	"github.com/blumsicle/bcli/internal/appconfig"
+	cliutil "github.com/blumsicle/bcli/internal/cli"
 	"github.com/rs/zerolog"
 )
 

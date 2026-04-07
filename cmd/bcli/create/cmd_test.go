@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/blumsicle/gsimp/internal/appconfig"
+	"github.com/blumsicle/bcli/internal/appconfig"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -14,10 +14,10 @@ import (
 
 func setTestGitIdentity(t *testing.T) {
 	t.Helper()
-	t.Setenv("GIT_AUTHOR_NAME", "gsimp test")
-	t.Setenv("GIT_AUTHOR_EMAIL", "gsimp-test@example.com")
-	t.Setenv("GIT_COMMITTER_NAME", "gsimp test")
-	t.Setenv("GIT_COMMITTER_EMAIL", "gsimp-test@example.com")
+	t.Setenv("GIT_AUTHOR_NAME", "bcli test")
+	t.Setenv("GIT_AUTHOR_EMAIL", "bcli-test@example.com")
+	t.Setenv("GIT_COMMITTER_NAME", "bcli test")
+	t.Setenv("GIT_COMMITTER_EMAIL", "bcli-test@example.com")
 }
 
 func TestRunGeneratesProject(t *testing.T) {

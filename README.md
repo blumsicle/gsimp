@@ -1,22 +1,22 @@
-# gsimp
+# bcli
 
 Generate starter repos for Go CLI tools built with Kong and zerolog.
 
 ## Usage
 
-`gsimp create mycommand "CLI tool that does some cool stuff"` creates a new starter project in `./mycommand`.
+`bcli create mycommand "CLI tool that does some cool stuff"` creates a new starter project in `./mycommand`.
 
-After generating the files, `gsimp` also runs post steps to update dependencies, tidy the module, initialize Git, and create an initial commit. Each of those four post steps can be disabled through config or `gsimp create` flags.
+After generating the files, `bcli` also runs post steps to update dependencies, tidy the module, initialize Git, and create an initial commit. Each of those four post steps can be disabled through config or `bcli create` flags.
 
 By default the generated module path uses just the project name. Set `--git-location` or `git_location` in config if you want a fully qualified module path such as `github.com/your-org/<name>`.
 
 Use `--root-path` or `-r` to choose a different parent directory:
 
-`gsimp create --root-path ~/src mycommand "CLI tool that does some cool stuff"`
+`bcli create --root-path ~/src mycommand "CLI tool that does some cool stuff"`
 
 Use `--git-location` or `-g` to change the repository prefix used in the generated `go.mod`:
 
-`gsimp create --git-location github.com/your-org mycommand "CLI tool that does some cool stuff"`
+`bcli create --git-location github.com/your-org mycommand "CLI tool that does some cool stuff"`
 
 Configuration can also be loaded from the file pointed to by `--config-file`. The generator currently supports these YAML keys:
 
@@ -31,7 +31,7 @@ post_steps:
   git_commit: true
 ```
 
-See [`gsimp.yaml`](./gsimp.yaml) for a concrete example config file with comments.
+See [`bcli.yaml`](./bcli.yaml) for a concrete example config file with comments.
 
 Precedence is:
 
@@ -72,7 +72,7 @@ The `make fmt` target expects these tools to be installed locally:
 
 ## Layout
 
-- `cmd/gsimp` contains the generator binary entrypoint and commands.
+- `cmd/bcli` contains the generator binary entrypoint and commands.
 - `internal/projectgen` contains the project generator.
 - `internal/appconfig`, `internal/poststep`, `cmd/globals.go`, `internal/cli`, and `cmd/<binary>/example` define the generator/runtime pieces in this repo.
 - `Makefile` handles local build, install, and verification workflows.

@@ -1,8 +1,8 @@
-# Example gsimp configuration.
+# Example bcli configuration.
 #
 # CLI flags override values loaded from this file.
 
-# Zerolog log level for gsimp itself.
+# Zerolog log level for bcli itself.
 log_level: info
 
 # Directory to create generated projects under.

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/blumsicle/gsimp/internal/appconfig"
+	"github.com/blumsicle/bcli/internal/appconfig"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

@@ -1,15 +1,15 @@
-// Package main defines the gsimp command-line interface.
+// Package main defines the bcli command-line interface.
 package main
 
 import (
 	"github.com/alecthomas/kong"
-	"github.com/blumsicle/gsimp/cmd"
-	"github.com/blumsicle/gsimp/cmd/gsimp/create"
-	"github.com/blumsicle/gsimp/internal/appconfig"
+	"github.com/blumsicle/bcli/cmd"
+	"github.com/blumsicle/bcli/cmd/bcli/create"
+	"github.com/blumsicle/bcli/internal/appconfig"
 	"github.com/rs/zerolog"
 )
 
-// CLI defines the root command tree for the gsimp generator.
+// CLI defines the root command tree for the bcli generator.
 type CLI struct {
 	cmd.Globals
 

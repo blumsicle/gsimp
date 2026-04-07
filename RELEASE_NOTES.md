@@ -2,13 +2,13 @@
 
 ## v0.1.0 - 2026-04-06
 
-First public release of `gsimp`.
+First public release of `bcli`.
 
-`gsimp` is now a generator CLI for bootstrapping Go command-line applications built with Kong and zerolog. This initial release focuses on a clean generated project layout, explicit configuration, and a practical post-generation workflow.
+`bcli` is now a generator CLI for bootstrapping Go command-line applications built with Kong and zerolog. This initial release focuses on a clean generated project layout, explicit configuration, and a practical post-generation workflow.
 
 ### Highlights
 
-- Added `gsimp create <name> <description>` to generate a new Go CLI starter project.
+- Added `bcli create <name> <description>` to generate a new Go CLI starter project.
 - Generated projects include a thin `main`, root command wiring, shared globals, an example subcommand, app config loading, runtime helpers, tests, a `Makefile`, and an example YAML config file.
 - Added typed app configuration with defaults, YAML loading, environment expansion, and clear precedence between defaults, config files, and CLI flags.
 - Added post-generation steps for dependency update, module tidy, Git initialization, and initial commit creation.

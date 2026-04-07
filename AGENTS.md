@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-`gsimp` is a Go CLI generator. The main entrypoint lives in `cmd/gsimp`, with the `create` subcommand under `cmd/gsimp/create`. Shared CLI globals are in `cmd/globals.go`.
+`bcli` is a Go CLI generator. The main entrypoint lives in `cmd/bcli`, with the `create` subcommand under `cmd/bcli/create`. Shared CLI globals are in `cmd/globals.go`.
 
 Core packages live under `internal/`:
 
@@ -49,7 +49,7 @@ When asked to create a release, write or update a descriptive `RELEASE_NOTES.md`
 
 When run manually without `--no-ask`, `scripts/release.sh` prompts for confirmation that `RELEASE_NOTES.md` was updated before proceeding.
 
-The GitHub Actions workflow at `.github/workflows/release.yml` publishes releases for pushed `v*` tags. It runs tests, builds the `darwin/arm64` `gsimp` binary, and creates the GitHub release using `RELEASE_NOTES.md` from the tagged commit as the release body.
+The GitHub Actions workflow at `.github/workflows/release.yml` publishes releases for pushed `v*` tags. It runs tests, builds the `darwin/arm64` `bcli` binary, and creates the GitHub release using `RELEASE_NOTES.md` from the tagged commit as the release body.
 GitHub repository settings must allow workflow `contents: write` permissions for the release job to create GitHub releases successfully.
 
 ## Commit & Pull Request Guidelines

@@ -1,4 +1,4 @@
-module github.com/blumsicle/gsimp
+module github.com/blumsicle/bcli
 
 go 1.26.1
 

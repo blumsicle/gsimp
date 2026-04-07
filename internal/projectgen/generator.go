@@ -13,8 +13,8 @@ import (
 	"strings"
 	"text/template"
 
-	cliutil "github.com/blumsicle/gsimp/internal/cli"
-	"github.com/blumsicle/gsimp/internal/poststep"
+	cliutil "github.com/blumsicle/bcli/internal/cli"
+	"github.com/blumsicle/bcli/internal/poststep"
 	"github.com/rs/zerolog"
 )
 
