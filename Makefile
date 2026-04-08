@@ -45,7 +45,10 @@ fmt:
 	goimports -w .
 	golines -w .
 
-check: vet test
+lint:
+	golangci-lint run ./...
+
+check: lint vet test
 
 clean:
 	rm -rf bin
@@ -63,4 +66,4 @@ coverage-html:
 vet:
 	$(GO) vet ./...
 
-.PHONY: install generate deps build rebuild tidy update fmt check clean test coverage coverage-html vet
+.PHONY: install generate deps build rebuild tidy update fmt lint check clean test coverage coverage-html vet

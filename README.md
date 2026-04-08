@@ -85,11 +85,12 @@ The generated project includes:
 - `make build` builds versioned binaries into `bin/`.
 - `make rebuild` forces a rebuild of versioned binaries.
 - `make install` installs the current CLI.
+- `make lint` runs `golangci-lint`.
 - `make test` runs Go tests.
 - `make coverage` runs Go tests with coverage output.
 - `make coverage-html` generates an HTML coverage report.
 - `make vet` runs `go vet`.
-- `make check` runs tests and vetting together.
+- `make check` runs linting, tests, and vetting together.
 - `make clean` removes built artifacts from `bin/`.
 
 ## Tooling

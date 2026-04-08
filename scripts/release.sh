@@ -71,9 +71,8 @@ if [[ "${notes_tracked}" == true ]] && git diff --quiet -- RELEASE_NOTES.md && g
 	exit 1
 fi
 
-golangci-lint run ./...
 make fmt
-make test
+make check
 
 git add RELEASE_NOTES.md
 git commit -m "Prepare release ${version}"
