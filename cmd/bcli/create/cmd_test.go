@@ -136,3 +136,32 @@ func TestAfterApplyOverridesConfig(t *testing.T) {
 	assert.False(t, cfg.PostSteps.GitInit)
 	assert.True(t, cfg.PostSteps.GitCommit)
 }
+
+func TestRunExpandsEnvironmentVariablesForGeneration(t *testing.T) {
+	setTestGitIdentity(t)
+	t.Setenv("BCLI_CREATE_ROOT", t.TempDir())
+	t.Setenv("BCLI_GIT_HOST", "github.com")
+
+	command := Command{
+		Name:        "cooltool",
+		Description: "CLI tool that does some cool stuff",
+	}
+
+	cfg := appconfig.Default()
+	cfg.RootPath = "$BCLI_CREATE_ROOT"
+	cfg.GitLocation = "$BCLI_GIT_HOST/blumsicle"
+	cfg.PostSteps.GoGetUpdate = false
+	cfg.PostSteps.GoModTidy = false
+	cfg.PostSteps.GitInit = false
+	cfg.PostSteps.GitCommit = false
+
+	err := command.Run(zerolog.Nop(), cfg)
+	require.NoError(t, err)
+
+	projectPath := filepath.Join(os.ExpandEnv(cfg.RootPath), "cooltool")
+	assert.DirExists(t, projectPath)
+
+	goMod, err := os.ReadFile(filepath.Join(projectPath, "go.mod"))
+	require.NoError(t, err)
+	assert.Contains(t, string(goMod), "module $BCLI_GIT_HOST/blumsicle/cooltool")
+}

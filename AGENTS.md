@@ -34,7 +34,7 @@ Standard verification flow after changes: `golangci-lint run ./...`, `make fmt`,
 
 Run `golangci-lint run ./...` outside the sandbox for this repository. Linting relies on normal Go build cache access to analyze the module correctly.
 Run `make test` outside the sandbox for this repository. The test suite invokes `go` and `git` in temporary directories and relies on normal Go build cache access.
-After code changes, also review documentation files such as `README.md`, `TEMPLATE_RECONSTRUCTION.md`, and other user-facing docs for any needed updates, and make those documentation changes in the same pass when applicable.
+After code changes, also review user-facing documentation files such as `README.md`, sample config files, release notes, and generated template docs for any needed updates, and make those documentation changes in the same pass when applicable.
 
 ## Coding Style & Naming Conventions
 

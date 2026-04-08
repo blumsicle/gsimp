@@ -55,7 +55,10 @@ func (c *Command) AfterApply(cfg *appconfig.Config) error {
 // Run generates the project scaffold and executes the configured post steps.
 func (c *Command) Run(log zerolog.Logger, cfg *appconfig.Config) error {
 	log = cliutil.SubLogger(log, "create")
+	cfg.Normalize()
 	log.Debug().
+		Str("root_path", cfg.RootPath).
+		Str("git_location", cfg.GitLocation).
 		Str("project_dir_prefix", cfg.ProjectDirPrefix).
 		Bool("go_get_update", cfg.PostSteps.GoGetUpdate).
 		Bool("go_mod_tidy", cfg.PostSteps.GoModTidy).

@@ -87,3 +87,20 @@ func TestRunCreatesParentDirectoriesForOutputFile(t *testing.T) {
 	require.NoError(t, yaml.Unmarshal(data, &got))
 	assert.Equal(t, *cfg, got)
 }
+
+func TestRunPreservesEnvironmentVariablesInOutput(t *testing.T) {
+	outputPath := filepath.Join(t.TempDir(), "resolved.yaml")
+	command := Command{Output: outputPath}
+	cfg := appconfig.Default()
+	cfg.RootPath = "$HOME/src"
+	cfg.GitLocation = "$GIT_HOST/acme"
+
+	err := command.Run(zerolog.Nop(), cfg)
+	require.NoError(t, err)
+
+	data, err := os.ReadFile(outputPath)
+	require.NoError(t, err)
+
+	assert.Contains(t, string(data), "root_path: $HOME/src")
+	assert.Contains(t, string(data), "git_location: $GIT_HOST/acme")
+}

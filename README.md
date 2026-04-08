@@ -36,9 +36,9 @@ post_steps:
   git_commit: true
 ```
 
-See [`bcli.yaml`](./bcli.yaml) for a concrete example config file with comments.
+Run `bcli config` to generate a config file with the current defaults, then edit it to fit your environment.
 
-Precedence is:
+Precedence is listed from lowest to highest:
 
 1. built-in defaults
 2. YAML config file
@@ -47,6 +47,8 @@ Precedence is:
 Use `bcli config` to inspect the fully resolved config after defaults and YAML file loading have been applied:
 
 `bcli config`
+
+`bcli config` preserves environment-variable references from the config file. `bcli create` normalizes config before generation and currently expands environment variables in `root_path`.
 
 By default, `bcli config` writes YAML to stdout. Use `--output` or `-o` to write it to a file instead:
 

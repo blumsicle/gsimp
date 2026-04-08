@@ -41,7 +41,6 @@ func TestGenerateCreatesStarterProject(t *testing.T) {
 		"BuildInfo:   cliutil.ResolveBuildInfo(name),",
 	)
 
-	assert.FileExists(t, filepath.Join(targetPath, "mycommand.yaml"))
 	assert.FileExists(t, filepath.Join(targetPath, "internal", "appconfig", "config.go"))
 	assert.FileExists(t, filepath.Join(targetPath, "internal", "appconfig", "load.go"))
 	assert.FileExists(t, filepath.Join(targetPath, "internal", "appconfig", "config_test.go"))
@@ -61,6 +60,11 @@ func TestGenerateCreatesStarterProject(t *testing.T) {
 	require.NoError(t, err)
 	assert.Contains(t, string(readme), "# mycommand")
 	assert.Contains(t, string(readme), "CLI tool that does some cool stuff")
+	assert.Contains(
+		t,
+		string(readme),
+		"Run `mycommand config` to generate a config file with the current defaults",
+	)
 
 	exampleCmd, err := os.ReadFile(
 		filepath.Join(targetPath, "cmd", "mycommand", "example", "cmd.go"),

@@ -71,7 +71,7 @@ func TestLoadYAMLOverridesDefaults(t *testing.T) {
 	assert.False(t, cfg.PostSteps.GitCommit)
 }
 
-func TestLoadYAMLExpandsEnvironmentVariables(t *testing.T) {
+func TestLoadYAMLPreservesEnvironmentVariableValues(t *testing.T) {
 	t.Setenv("BCLI_TEST_HOME", "/tmp/home")
 
 	configPath := filepath.Join(t.TempDir(), "config.yaml")
@@ -90,7 +90,7 @@ func TestLoadYAMLExpandsEnvironmentVariables(t *testing.T) {
 	err := cfg.LoadYAML(configPath)
 	require.NoError(t, err)
 
-	assert.Equal(t, "/tmp/home/src", cfg.RootPath)
+	assert.Equal(t, "$BCLI_TEST_HOME/src", cfg.RootPath)
 	assert.Equal(t, "generated-", cfg.ProjectDirPrefix)
 	assert.Equal(t, "github.com/acme", cfg.GitLocation)
 }

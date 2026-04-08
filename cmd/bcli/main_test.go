@@ -142,7 +142,7 @@ func TestConfigCommandWritesMergedConfigToFile(t *testing.T) {
 		os.WriteFile(
 			configPath,
 			[]byte(
-				"root_path: /from-config\ngit_location: github.com/from-config\npost_steps:\n  git_commit: false\n",
+				"root_path: $HOME/from-config\ngit_location: $GIT_HOST/from-config\npost_steps:\n  git_commit: false\n",
 			),
 			0o644,
 		),
@@ -172,8 +172,8 @@ func TestConfigCommandWritesMergedConfigToFile(t *testing.T) {
 
 	var got appconfig.Config
 	require.NoError(t, yaml.Unmarshal(data, &got))
-	assert.Equal(t, "/from-config", got.RootPath)
-	assert.Equal(t, "github.com/from-config", got.GitLocation)
+	assert.Equal(t, "$HOME/from-config", got.RootPath)
+	assert.Equal(t, "$GIT_HOST/from-config", got.GitLocation)
 	assert.Equal(t, zerolog.InfoLevel, got.LogLevel)
 	assert.True(t, got.PostSteps.GoGetUpdate)
 	assert.True(t, got.PostSteps.GoModTidy)

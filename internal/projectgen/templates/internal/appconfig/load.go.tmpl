@@ -23,8 +23,5 @@ func (c *Config) LoadYAML(path string) error {
 		return err
 	}
 
-	c.RootPath = os.ExpandEnv(c.RootPath)
-	c.GitLocation = os.ExpandEnv(c.GitLocation)
-
 	return nil
 }

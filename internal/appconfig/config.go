@@ -1,7 +1,11 @@
 // Package appconfig defines application configuration defaults and schema.
 package appconfig
 
-import "github.com/rs/zerolog"
+import (
+	"os"
+
+	"github.com/rs/zerolog"
+)
 
 // PostStepsConfig contains configurable post-generation step toggles.
 type PostStepsConfig struct {
@@ -34,4 +38,9 @@ func Default() *Config {
 			GitCommit:   true,
 		},
 	}
+}
+
+// Normalize expands config values that should be resolved before command execution.
+func (c *Config) Normalize() {
+	c.RootPath = os.ExpandEnv(c.RootPath)
 }

@@ -2,25 +2,60 @@
 
 {{ .Description }}
 
-Starter repo for a Go CLI tool built with Kong and zerolog.
+Generate and run a Go CLI tool built with Kong and zerolog.
 
-The module path is `{{ .ModulePath }}`.
+## Usage
 
-Configuration can be loaded from `~/.config/{{ .Name }}/config.yaml`. CLI flags override values loaded from that file.
+`{{ .Name }} example` runs the example subcommand included in the generated project.
 
-Example config:
+Configuration can be loaded from the file pointed to by `--config-file`. The generated CLI currently supports these YAML keys:
 
 ```yaml
 log_level: info
 root_path: .
+project_dir_prefix: ""
 git_location: ""
 ```
 
+Run `{{ .Name }} config` to generate a config file with the current defaults, then edit it to fit your environment.
+
+Precedence is listed from lowest to highest:
+
+1. built-in defaults
+2. YAML config file
+3. explicit CLI flags
+
+Use `{{ .Name }} config` to inspect the fully resolved config after defaults and config-file loading have been applied:
+
+`{{ .Name }} config`
+
+`{{ .Name }} config` preserves environment-variable references from the config file. Commands can call `cfg.Normalize()` when they need normalized path values.
+
+By default, `{{ .Name }} config` writes YAML to stdout. Use `--output` or `-o` to write it to a file instead:
+
+`{{ .Name }} config --output /tmp/{{ .Name }}-resolved.yaml`
+
+If the parent directories in the `--output` path do not exist, `{{ .Name }} config` creates them before writing the file.
+
+The generated project includes:
+
+- a thin `main`
+- shared app config in `internal/appconfig`
+- shared CLI runtime code under `internal/cli`
+- shared injected args in `cmd/globals.go` with a default config path under `~/.config/{{ .Name }}/`
+- a `go.mod` whose `go` version matches the locally available Go toolchain used to generate the project
+- an example subcommand
+- a config inspection subcommand
+- a Makefile with build, rebuild, test, vet, check, and clean targets
+- smoke tests for help, version, and command wiring
+
 ## Common Commands
 
+- `{{ .Name }} config` writes the resolved config as YAML to stdout or a file.
+- `{{ .Name }} example` runs the example subcommand.
 - `make build` builds versioned binaries into `bin/`.
 - `make rebuild` forces a rebuild of versioned binaries.
-- `make install` installs the current CLI with embedded build metadata.
+- `make install` installs the current CLI.
 - `make test` runs Go tests.
 - `make coverage` runs Go tests with coverage output.
 - `make coverage-html` generates an HTML coverage report.
@@ -38,8 +73,8 @@ The `make fmt` target expects these tools to be installed locally:
 
 ## Layout
 
-- `internal/appconfig` contains application config defaults, loading, and tests.
-- `cmd/<binary>` contains binary entrypoints and command wiring.
+- `cmd/{{ .Name }}` contains the binary entrypoint and command tree.
+- `internal/appconfig` contains application config defaults, loading, normalization, and tests.
 - `cmd/globals.go` contains shared injected arguments used by command handlers.
 - `internal/cli` contains shared CLI runtime code for parsing, logging, and build metadata wiring.
 - `Makefile` handles local build, install, and verification workflows.
