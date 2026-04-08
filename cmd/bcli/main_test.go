@@ -83,9 +83,65 @@ func TestHelpFlag(t *testing.T) {
 	assert.Equal(t, 0, exitCode)
 	assert.Contains(t, stdout.String(), "Generate starter Go CLI projects")
 	assert.Contains(t, stdout.String(), "--log-level")
+	assert.Contains(t, stdout.String(), "completion")
 	assert.Contains(t, stdout.String(), "config")
 	assert.Contains(t, stdout.String(), "create")
 	assert.Empty(t, stderr.String())
+}
+
+func TestCompletionCommandWritesShellCompletionScript(t *testing.T) {
+	tests := []struct {
+		shell    string
+		contains []string
+	}{
+		{
+			shell: "zsh",
+			contains: []string{
+				"#compdef bcli",
+				"compdef _bcli bcli",
+				"_bcli() {",
+			},
+		},
+		{
+			shell: "bash",
+			contains: []string{
+				"_bcli_completions()",
+				"complete -F _bcli_completions bcli",
+			},
+		},
+		{
+			shell: "fish",
+			contains: []string{
+				"# fish shell completion for bcli",
+				"complete -c bcli -f",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.shell, func(t *testing.T) {
+			cli := &CLI{}
+			appConfig := &appconfig.Config{}
+			var stdout bytes.Buffer
+			var stderr bytes.Buffer
+			exitCode := -1
+
+			parser := newTestParser(t, cli, appConfig, &stdout, &stderr, &exitCode)
+
+			ctx, err := parser.Parse([]string{"completion", tt.shell})
+			require.NoError(t, err)
+
+			log := zerolog.New(&bytes.Buffer{})
+			err = cliutil.Run(ctx, log)
+			require.NoError(t, err)
+
+			assert.Equal(t, -1, exitCode)
+			for _, want := range tt.contains {
+				assert.Contains(t, stdout.String(), want)
+			}
+			assert.Empty(t, stderr.String())
+		})
+	}
 }
 
 func TestConfigFileLoadsAndFlagsOverrideIt(t *testing.T) {

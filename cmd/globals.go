@@ -3,5 +3,5 @@ package cmd
 
 // Globals defines root-level flags that are injected into command handlers.
 type Globals struct {
-	ConfigFile string `short:"c" default:"~/.config/bcli/config.yaml" type:"path" help:"Path to the config file"`
+	ConfigFile string `short:"c" default:"~/.config/bcli/config.yaml" type:"path" completion:"<file>" help:"Path to the config file"`
 }

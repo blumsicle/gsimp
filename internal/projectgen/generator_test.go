@@ -65,12 +65,20 @@ func TestGenerateCreatesStarterProject(t *testing.T) {
 		string(readme),
 		"Run `mycommand config` to generate a config file with the current defaults",
 	)
+	assert.Contains(t, string(readme), "`mycommand completion zsh`")
 
 	exampleCmd, err := os.ReadFile(
 		filepath.Join(targetPath, "cmd", "mycommand", "example", "cmd.go"),
 	)
 	require.NoError(t, err)
 	assert.Contains(t, string(exampleCmd), "\"github.com/blumsicle/mycommand/cmd\"")
+
+	completionCmd, err := os.ReadFile(
+		filepath.Join(targetPath, "cmd", "mycommand", "completion", "cmd.go"),
+	)
+	require.NoError(t, err)
+	assert.Contains(t, string(completionCmd), `enum:"zsh,bash,fish"`)
+	assert.Contains(t, string(completionCmd), "var completer king.Completer")
 }
 
 func TestGenerateUsesProjectDirPrefixOnlyForTargetPath(t *testing.T) {

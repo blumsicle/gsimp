@@ -20,12 +20,7 @@ func main() {
 		BuildInfo:   cliutil.ResolveBuildInfo(name),
 	}
 
-	ctx := cliutil.Parse(
-		cli,
-		cfg,
-		kong.Bind(&cli.Globals),
-		kong.Bind(appConfig),
-	)
+	ctx := cliutil.Parse(cli, cfg, kong.Bind(&cli.Globals), kong.Bind(appConfig))
 
 	zerolog.DurationFieldUnit = time.Minute
 	zerolog.TimeFieldFormat = time.DateTime + " MST"

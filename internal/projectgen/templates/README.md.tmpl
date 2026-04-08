@@ -37,6 +37,14 @@ By default, `{{ .Name }} config` writes YAML to stdout. Use `--output` or `-o` t
 
 If the parent directories in the `--output` path do not exist, `{{ .Name }} config` creates them before writing the file.
 
+Use `{{ .Name }} completion <shell>` to print a shell completion script for `zsh`, `bash`, or `fish`:
+
+`{{ .Name }} completion zsh`
+
+The zsh output defines `_{{ .Name }}`. To install it persistently in zsh, write it into a directory on `fpath`, for example:
+
+`mkdir -p ~/.zsh/completions && {{ .Name }} completion zsh > ~/.zsh/completions/_{{ .Name }}`
+
 The generated project includes:
 
 - a thin `main`
@@ -45,6 +53,7 @@ The generated project includes:
 - shared injected args in `cmd/globals.go` with a default config path under `~/.config/{{ .Name }}/`
 - a `go.mod` whose `go` version matches the locally available Go toolchain used to generate the project
 - an example subcommand
+- a shell completion subcommand
 - a config inspection subcommand
 - a Makefile with build, rebuild, test, vet, check, and clean targets
 - smoke tests for help, version, and command wiring
@@ -52,6 +61,7 @@ The generated project includes:
 ## Common Commands
 
 - `{{ .Name }} config` writes the resolved config as YAML to stdout or a file.
+- `{{ .Name }} completion <shell>` prints a completion script for `zsh`, `bash`, or `fish`.
 - `{{ .Name }} example` runs the example subcommand.
 - `make build` builds versioned binaries into `bin/`.
 - `make rebuild` forces a rebuild of versioned binaries.

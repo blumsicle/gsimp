@@ -28,12 +28,13 @@ Use `make` targets as the primary interface:
 - `make fmt`: run `gofumpt`, `goimports`, and `golines`
 - `make test`: run `go test ./...`
 - `make vet`: run `go vet ./...`
+- `make check`: run `make vet` and `make test`
 - `golangci-lint run ./...`: run the full lint suite expected by the repo
 
-Standard verification flow after changes: `golangci-lint run ./...`, `make fmt`, then `make test`.
+Standard verification flow after changes: `golangci-lint run ./...`, `make fmt`, then `make check`.
 
 Run `golangci-lint run ./...` outside the sandbox for this repository. Linting relies on normal Go build cache access to analyze the module correctly.
-Run `make test` outside the sandbox for this repository. The test suite invokes `go` and `git` in temporary directories and relies on normal Go build cache access.
+Run `make check` outside the sandbox for this repository. The verification flow invokes `go` and `git` in temporary directories and relies on normal Go build cache access.
 After code changes, also review user-facing documentation files such as `README.md`, sample config files, release notes, and generated template docs for any needed updates, and make those documentation changes in the same pass when applicable.
 
 ## Coding Style & Naming Conventions
@@ -52,7 +53,7 @@ Some post-step tests invoke `go` and `git` in temporary directories. Preserve th
 
 ## Release Process
 
-When asked to create a release, write or update a descriptive `RELEASE_NOTES.md` manually rather than auto-generating a minimal changelog. Then run `golangci-lint run ./...`, `make fmt`, and `make test` before tagging. Use `scripts/release.sh --no-ask vX.Y.Z` after `RELEASE_NOTES.md` is already updated in the worktree; the script stages `RELEASE_NOTES.md`, creates the release commit, creates an annotated tag, and pushes both the branch and tag to `origin`.
+When asked to create a release, write or update a descriptive `RELEASE_NOTES.md` manually rather than auto-generating a minimal changelog. Then run `golangci-lint run ./...`, `make fmt`, and `make check` before tagging. Use `scripts/release.sh --no-ask vX.Y.Z` after `RELEASE_NOTES.md` is already updated in the worktree; the script stages `RELEASE_NOTES.md`, creates the release commit, creates an annotated tag, and pushes both the branch and tag to `origin`.
 
 When run manually without `--no-ask`, `scripts/release.sh` prompts for confirmation that `RELEASE_NOTES.md` was updated before proceeding.
 

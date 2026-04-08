@@ -14,7 +14,7 @@ import (
 
 // Command writes the resolved application config as YAML.
 type Command struct {
-	Output string `short:"o" default:"-" type:"path" help:"Path to write the resolved config YAML, or - for stdout"`
+	Output string `short:"o" default:"-" type:"path" completion:"<file>" help:"Path to write the resolved config YAML, or - for stdout"`
 }
 
 // Run writes the merged config to stdout or a file.

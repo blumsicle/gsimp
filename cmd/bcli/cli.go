@@ -4,6 +4,7 @@ package main
 import (
 	"github.com/alecthomas/kong"
 	"github.com/blumsicle/bcli/cmd"
+	"github.com/blumsicle/bcli/cmd/bcli/completion"
 	configcmd "github.com/blumsicle/bcli/cmd/bcli/config"
 	"github.com/blumsicle/bcli/cmd/bcli/create"
 	"github.com/blumsicle/bcli/internal/appconfig"
@@ -17,8 +18,9 @@ type CLI struct {
 	LogLevel *zerolog.Level   `short:"l" help:"Log level"`
 	Version  kong.VersionFlag `short:"v" help:"Output version"`
 
-	Config configcmd.Command `cmd:"" help:"Write the resolved config as YAML"`
-	Create create.Command    `cmd:"" help:"Create a new Go CLI starter project"`
+	Completion completion.Command `cmd:"" help:"Generate shell completions"`
+	Config     configcmd.Command  `cmd:"" help:"Write the resolved config as YAML"`
+	Create     create.Command     `cmd:"" help:"Create a new Go CLI starter project"`
 }
 
 // AfterApply loads file-backed config and applies root flag overrides.

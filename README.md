@@ -58,6 +58,14 @@ By default, `bcli config` writes YAML to stdout. Use `--output` or `-o` to write
 
 If the parent directories in the `--output` path do not exist, `bcli config` creates them before writing the file.
 
+Use `bcli completion <shell>` to print a shell completion script for `zsh`, `bash`, or `fish`:
+
+`bcli completion zsh`
+
+The zsh output defines `_bcli`. To install it persistently in zsh, write it into a directory on `fpath`, for example:
+
+`mkdir -p ~/.zsh/completions && bcli completion zsh > ~/.zsh/completions/_bcli`
+
 The generated project includes:
 
 - a thin `main`
@@ -65,7 +73,7 @@ The generated project includes:
 - shared CLI runtime code under `internal/cli`
 - shared injected args in `cmd/globals.go` with a default config path under `~/.config/<project>/`
 - a `go.mod` whose `go` version matches the locally available Go toolchain used to run `bcli`
-- a `<project>.yaml` example config file
+- a shell completion subcommand for `zsh`, `bash`, and `fish`
 - an example subcommand
 - a Makefile with build, rebuild, test, vet, check, and clean targets
 - smoke tests for help, version, and command wiring
@@ -73,6 +81,7 @@ The generated project includes:
 ## Common Commands
 
 - `bcli config` writes the resolved config as YAML to stdout or a file.
+- `bcli completion <shell>` prints a completion script for `zsh`, `bash`, or `fish`.
 - `make build` builds versioned binaries into `bin/`.
 - `make rebuild` forces a rebuild of versioned binaries.
 - `make install` installs the current CLI.

@@ -14,15 +14,15 @@ import (
 
 // Command creates a new starter CLI project.
 type Command struct {
-	RootPath         *string `short:"r" help:"Directory to create the new project under"                 type:"path"`
+	RootPath         *string `short:"r" help:"Directory to create the new project under"                 type:"path" completion:"<directory>"`
 	ProjectDirPrefix *string `short:"p" help:"Prefix to prepend to the generated project directory name"`
 	GitLocation      *string `short:"g" help:"Git host and owner prefix for the generated module path"`
 	NoGoGetUpdate    bool    `          help:"Skip the 'go get -u ./...' post step"`
 	NoGoModTidy      bool    `          help:"Skip the 'go mod tidy' post step"`
 	NoGitInit        bool    `          help:"Skip the 'git init' post step"`
 	NoGitCommit      bool    `          help:"Skip the 'git commit' post step"`
-	Name             string  `          help:"Name of the new CLI project"                                           arg:"" required:""`
-	Description      string  `          help:"Description for the generated CLI"                                     arg:"" required:""`
+	Name             string  `          help:"Name of the new CLI project"                                                                    arg:"" required:""`
+	Description      string  `          help:"Description for the generated CLI"                                                              arg:"" required:""`
 }
 
 // AfterApply applies command-specific flag overrides to the shared app config.

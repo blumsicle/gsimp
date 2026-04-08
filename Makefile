@@ -45,9 +45,7 @@ fmt:
 	goimports -w .
 	golines -w .
 
-check:
-	$(MAKE) test
-	$(MAKE) vet
+check: vet test
 
 clean:
 	rm -rf bin
