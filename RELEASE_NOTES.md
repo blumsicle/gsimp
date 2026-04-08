@@ -1,5 +1,22 @@
 # Release Notes
 
+## v0.2.3 - 2026-04-07
+
+Adds an MIT license to the repository and aligns the generated scaffold’s config and documentation workflow with the current `bcli` behavior.
+
+### Highlights
+
+- Added an MIT `LICENSE` file to the main `bcli` repository.
+- Updated generated projects to include the `config` subcommand in their command tree and tests.
+- Moved config normalization behind `appconfig.Config.Normalize()` so commands can opt into normalized path behavior explicitly.
+- Updated generated and repository README guidance to use the `config` subcommand to emit default config values instead of shipping example config files.
+- Removed the old template reconstruction and example config artifacts that no longer matched the current workflow.
+
+### Notes
+
+- The MIT license applies to this repository only; generated projects do not receive a license file automatically.
+- This remains a `0.x` release, so generated output and command surface may still evolve before a `v1.0.0` stability commitment.
+
 ## v0.2.2 - 2026-04-07
 
 Adds more flexible project output path handling in `create` and improves file output behavior in `config`, along with a generated `go.mod` update that follows the local Go toolchain.
