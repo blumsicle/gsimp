@@ -42,6 +42,7 @@ update:
 
 fmt:
 	gofumpt -w .
+	gci write .
 	goimports -w .
 	golines -w .
 

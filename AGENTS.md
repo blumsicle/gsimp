@@ -25,7 +25,7 @@ Use `make` targets as the primary interface:
 
 - `make install`: install the local CLI from `cmd/*/main.go`
 - `make build`: build versioned binaries into `bin/`
-- `make fmt`: run `gofumpt`, `goimports`, and `golines`
+- `make fmt`: run `gofumpt`, `gci`, `goimports`, and `golines`
 - `make lint`: run `golangci-lint run ./...`
 - `make test`: run `go test ./...`
 - `make vet`: run `go vet ./...`

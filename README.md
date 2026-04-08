@@ -98,6 +98,7 @@ The generated project includes:
 The `make fmt` target expects these tools to be installed locally:
 
 - `gofumpt`
+- `gci`
 - `goimports`
 - `golines`
 
