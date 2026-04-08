@@ -2,6 +2,8 @@
 
 Generate starter repos for Go CLI tools built with Kong and zerolog.
 
+This repository is licensed under the MIT License. See [`LICENSE`](./LICENSE).
+
 ## Usage
 
 `bcli create mycommand "CLI tool that does some cool stuff"` creates a new starter project in `./mycommand`.
