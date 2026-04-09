@@ -23,25 +23,25 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - name: Run tests
-        run: go test ./...
-
-      - name: Build darwin arm64 binary
-        env:
-          CGO_ENABLED: "0"
-          GOOS: darwin
-          GOARCH: arm64
+      - name: Install formatting and lint tools
         run: |
-          mkdir -p dist
-          go build \
-            -o dist/bcli-darwin-arm64 \
-            ./cmd/bcli
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+          go install mvdan.cc/gofumpt@latest
+          go install github.com/daixiang0/gci@latest
+          go install golang.org/x/tools/cmd/goimports@latest
+          go install github.com/segmentio/golines@latest
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
-      - name: Create GitHub release
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+      - name: Verify
         run: |
-          gh release create "${GITHUB_REF_NAME}" \
-            --title "${GITHUB_REF_NAME}" \
-            --notes-file RELEASE_NOTES.md \
-            dist/bcli-darwin-arm64
+          make fmt
+          make check
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --clean --release-notes=RELEASE_NOTES.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

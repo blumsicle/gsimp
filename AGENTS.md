@@ -57,8 +57,8 @@ When asked to create a release, write or update a descriptive `RELEASE_NOTES.md`
 
 When run manually without `--no-ask`, `scripts/release.sh` prompts for confirmation that `RELEASE_NOTES.md` was updated before proceeding.
 
-The GitHub Actions workflow at `.github/workflows/release.yml` publishes releases for pushed `v*` tags. It runs tests, builds the `darwin/arm64` `bcli` binary, and creates the GitHub release using `RELEASE_NOTES.md` from the tagged commit as the release body.
-GitHub repository settings must allow workflow `contents: write` permissions for the release job to create GitHub releases successfully.
+The GitHub Actions workflow at `.github/workflows/release.yml` publishes releases for pushed `v*` tags via GoReleaser using `.goreleaser.yaml`. It runs `make fmt` and `make check`, builds the `darwin/arm64` `bcli` binary, and publishes the GitHub release using `RELEASE_NOTES.md` from the tagged commit as the release body.
+GitHub repository settings must allow workflow `contents: write` permissions for the release job to create GitHub releases successfully, and the workflow must provide `GITHUB_TOKEN` to GoReleaser.
 
 ## Commit & Pull Request Guidelines
 
