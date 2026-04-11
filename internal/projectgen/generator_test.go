@@ -194,6 +194,56 @@ func TestGenerateFailsWhenTargetExists(t *testing.T) {
 	assert.Contains(t, err.Error(), "target path already exists")
 }
 
+func TestTemplatesMatchCanonicalSourcesWithBCLIData(t *testing.T) {
+	tests := []struct {
+		name       string
+		sourcePath string
+		template   string
+	}{
+		{
+			name:       "main command",
+			sourcePath: "cmd/bcli/main.go",
+			template:   "templates/cmd/__NAME__/main.go.tmpl",
+		},
+		{
+			name:       "appconfig load",
+			sourcePath: "internal/appconfig/load.go",
+			template:   "templates/internal/appconfig/load.go.tmpl",
+		},
+		{
+			name:       "appconfig normalize",
+			sourcePath: "internal/appconfig/normalize.go",
+			template:   "templates/internal/appconfig/normalize.go.tmpl",
+		},
+		{
+			name:       "appconfig root overrides",
+			sourcePath: "internal/appconfig/root.go",
+			template:   "templates/internal/appconfig/root.go.tmpl",
+		},
+		{
+			name:       "cli build info",
+			sourcePath: "internal/cli/buildinfo.go",
+			template:   "templates/internal/cli/buildinfo.go.tmpl",
+		},
+		{
+			name:       "cli runner",
+			sourcePath: "internal/cli/runner.go",
+			template:   "templates/internal/cli/runner.go.tmpl",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := renderTemplateWithBCLIData(t, tt.template)
+
+			want, err := os.ReadFile(repoPath(tt.sourcePath))
+			require.NoError(t, err)
+
+			assert.Equal(t, string(want), got)
+		})
+	}
+}
+
 type recordingPostStep struct {
 	name    string
 	ran     *bool
@@ -269,4 +319,25 @@ func TestGenerateStopsOnPostStepError(t *testing.T) {
 	require.Error(t, err)
 	assert.ErrorContains(t, err, `run post step "first"`)
 	assert.Equal(t, []string{"first"}, visited)
+}
+
+func renderTemplateWithBCLIData(t *testing.T, templatePath string) string {
+	t.Helper()
+
+	got, err := New(zerolog.Nop()).renderTemplate(
+		templatePath,
+		templateData{
+			Name:        "bcli",
+			Description: "Generate starter Go CLI projects",
+			ModulePath:  "github.com/blumsicle/bcli",
+			GoVersion:   currentGoVersion(),
+		},
+	)
+	require.NoError(t, err)
+
+	return got
+}
+
+func repoPath(relativePath string) string {
+	return filepath.Join("..", "..", filepath.FromSlash(relativePath))
 }

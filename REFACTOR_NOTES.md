@@ -42,6 +42,9 @@ Status values:
   - 2026-04-11: Split projectgen internals into focused files for
     generator orchestration, input config, planning, template rendering,
     filesystem writes, and Go version resolution.
+  - 2026-04-11: Added exact-match drift tests for rendered templates
+    that should match canonical `bcli` source files with `bcli` template
+    data, covering shared runtime helpers and common appconfig behavior.
 
 ### 2. Split `Generator.Generate` into smaller private steps
 
