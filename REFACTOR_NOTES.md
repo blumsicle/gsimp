@@ -12,7 +12,7 @@ Status values:
 
 ### 1. Reduce repo/template duplication
 
-- Status: `in progress`
+- Status: `pending`
 - Priority: high
 - Summary:
   The real CLI/runtime code and the generated template code mirror each
@@ -20,9 +20,8 @@ Status values:
   files and the templates.
 - Key references:
   - [internal/projectgen/generator.go](/Users/blumsicle/src/go/bcli/internal/projectgen/generator.go)
-  - [scaffoldfiles.go](/Users/blumsicle/src/go/bcli/scaffoldfiles.go)
   - [internal/cli/runner.go](/Users/blumsicle/src/go/bcli/internal/cli/runner.go)
-  - [internal/appconfig/load.go](/Users/blumsicle/src/go/bcli/internal/appconfig/load.go)
+  - [internal/projectgen/templates/internal/cli/runner.go.tmpl](/Users/blumsicle/src/go/bcli/internal/projectgen/templates/internal/cli/runner.go.tmpl)
   - [cmd/bcli/main_test.go](/Users/blumsicle/src/go/bcli/cmd/bcli/main_test.go)
   - [internal/projectgen/templates/cmd/__NAME__/main_test.go.tmpl](/Users/blumsicle/src/go/bcli/internal/projectgen/templates/cmd/__NAME__/main_test.go.tmpl)
 - Progress notes:
@@ -32,13 +31,11 @@ Status values:
     changes in real appconfig code/tests and generated appconfig
     templates/tests, confirming appconfig as another duplication
     hotspot.
-  - 2026-04-11: Exact duplicate runtime/config files are embedded from
-    canonical source files through the root package and copied directly
-    into generated projects, covering `internal/cli` runtime files and
-    `internal/appconfig/load.go`.
-  - 2026-04-11: Stopped after the first duplication-reduction slice;
-    remaining generated files that require substitutions still use
-    templates.
+  - 2026-04-11: Backed away from copying exact duplicate source files
+    directly because those files may need template substitutions later.
+    Keep generation template-based for now, then add drift tests for
+    canonical/generated file pairs after related package code is split
+    into more focused files.
 
 ### 2. Split `Generator.Generate` into smaller private steps
 
