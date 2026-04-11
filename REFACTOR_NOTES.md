@@ -104,7 +104,7 @@ Status values:
 
 ### 6. Introduce a small CLI test harness helper
 
-- Status: `pending`
+- Status: `done`
 - Priority: low
 - Summary:
   Parser, stdout, stderr, and exit-code setup is repeated across the
@@ -115,6 +115,9 @@ Status values:
 - Progress notes:
   - 2026-04-09: This is lower priority than the structural
     production-code refactors, but it would reduce test noise.
+  - 2026-04-11: Added a local CLI test harness pattern to the real and
+    generated CLI smoke tests to centralize parser, output buffer, and
+    exit-code setup.
 
 ## Suggested Order
 

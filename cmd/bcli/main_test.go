@@ -26,67 +26,86 @@ func testConfig() cliutil.Config {
 	}
 }
 
-func newTestParser(
-	t *testing.T,
-	cli *CLI,
-	appConfig *appconfig.Config,
-	stdout *bytes.Buffer,
-	stderr *bytes.Buffer,
-	exitCode *int,
-) *kong.Kong {
+type cliTestHarness struct {
+	cli       *CLI
+	appConfig *appconfig.Config
+	stdout    bytes.Buffer
+	stderr    bytes.Buffer
+	exitCode  int
+	parser    *kong.Kong
+}
+
+func newCLITestHarness(t *testing.T, appConfig *appconfig.Config) *cliTestHarness {
 	t.Helper()
+	if appConfig == nil {
+		appConfig = &appconfig.Config{}
+	}
+
+	harness := &cliTestHarness{
+		cli:       &CLI{},
+		appConfig: appConfig,
+		exitCode:  -1,
+	}
 
 	parser, err := cliutil.New(
-		cli,
+		harness.cli,
 		testConfig(),
-		kong.Bind(&cli.Globals),
-		kong.Bind(appConfig),
-		kong.Writers(stdout, stderr),
+		kong.Bind(&harness.cli.Globals),
+		kong.Bind(harness.appConfig),
+		kong.Writers(&harness.stdout, &harness.stderr),
 		kong.Exit(func(code int) {
-			*exitCode = code
+			harness.exitCode = code
 		}),
 	)
 	require.NoError(t, err)
 
-	return parser
+	harness.parser = parser
+	return harness
+}
+
+func (h *cliTestHarness) parse(t *testing.T, args ...string) (*kong.Context, error) {
+	t.Helper()
+	return h.parser.Parse(args)
+}
+
+func (h *cliTestHarness) run(t *testing.T, ctx *kong.Context) error {
+	t.Helper()
+	log := zerolog.New(&bytes.Buffer{})
+	return cliutil.Run(ctx, log)
+}
+
+func (h *cliTestHarness) stdoutString() string {
+	return h.stdout.String()
+}
+
+func (h *cliTestHarness) stderrString() string {
+	return h.stderr.String()
 }
 
 func TestVersionFlag(t *testing.T) {
-	cli := &CLI{}
-	appConfig := &appconfig.Config{}
-	var stdout bytes.Buffer
-	var stderr bytes.Buffer
-	exitCode := -1
+	harness := newCLITestHarness(t, nil)
 
-	parser := newTestParser(t, cli, appConfig, &stdout, &stderr, &exitCode)
-
-	_, err := parser.Parse([]string{"--version"})
+	_, err := harness.parse(t, "--version")
 	require.Error(t, err)
 
-	assert.Equal(t, 0, exitCode)
-	assert.Equal(t, "bcli test-version test-commit\n", stdout.String())
-	assert.Empty(t, stderr.String())
+	assert.Equal(t, 0, harness.exitCode)
+	assert.Equal(t, "bcli test-version test-commit\n", harness.stdoutString())
+	assert.Empty(t, harness.stderrString())
 }
 
 func TestHelpFlag(t *testing.T) {
-	cli := &CLI{}
-	appConfig := &appconfig.Config{}
-	var stdout bytes.Buffer
-	var stderr bytes.Buffer
-	exitCode := -1
+	harness := newCLITestHarness(t, nil)
 
-	parser := newTestParser(t, cli, appConfig, &stdout, &stderr, &exitCode)
-
-	_, err := parser.Parse([]string{"--help"})
+	_, err := harness.parse(t, "--help")
 	require.Error(t, err)
 
-	assert.Equal(t, 0, exitCode)
-	assert.Contains(t, stdout.String(), "Generate starter Go CLI projects")
-	assert.Contains(t, stdout.String(), "--log-level")
-	assert.Contains(t, stdout.String(), "completion")
-	assert.Contains(t, stdout.String(), "config")
-	assert.Contains(t, stdout.String(), "create")
-	assert.Empty(t, stderr.String())
+	assert.Equal(t, 0, harness.exitCode)
+	assert.Contains(t, harness.stdoutString(), "Generate starter Go CLI projects")
+	assert.Contains(t, harness.stdoutString(), "--log-level")
+	assert.Contains(t, harness.stdoutString(), "completion")
+	assert.Contains(t, harness.stdoutString(), "config")
+	assert.Contains(t, harness.stdoutString(), "create")
+	assert.Empty(t, harness.stderrString())
 }
 
 func TestCompletionCommandWritesShellCompletionScript(t *testing.T) {
@@ -120,26 +139,19 @@ func TestCompletionCommandWritesShellCompletionScript(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.shell, func(t *testing.T) {
-			cli := &CLI{}
-			appConfig := &appconfig.Config{}
-			var stdout bytes.Buffer
-			var stderr bytes.Buffer
-			exitCode := -1
+			harness := newCLITestHarness(t, nil)
 
-			parser := newTestParser(t, cli, appConfig, &stdout, &stderr, &exitCode)
-
-			ctx, err := parser.Parse([]string{"completion", tt.shell})
+			ctx, err := harness.parse(t, "completion", tt.shell)
 			require.NoError(t, err)
 
-			log := zerolog.New(&bytes.Buffer{})
-			err = cliutil.Run(ctx, log)
+			err = harness.run(t, ctx)
 			require.NoError(t, err)
 
-			assert.Equal(t, -1, exitCode)
+			assert.Equal(t, -1, harness.exitCode)
 			for _, want := range tt.contains {
-				assert.Contains(t, stdout.String(), want)
+				assert.Contains(t, harness.stdoutString(), want)
 			}
-			assert.Empty(t, stderr.String())
+			assert.Empty(t, harness.stderrString())
 		})
 	}
 }
@@ -157,19 +169,15 @@ func TestConfigFileLoadsAndFlagsOverrideIt(t *testing.T) {
 		),
 	)
 
-	cli := &CLI{}
 	appConfig := &appconfig.Config{}
-	var stdout bytes.Buffer
-	var stderr bytes.Buffer
-	exitCode := -1
-
-	parser := newTestParser(t, cli, appConfig, &stdout, &stderr, &exitCode)
+	harness := newCLITestHarness(t, appConfig)
 
 	flagRootPath := "/from-flag"
 	flagProjectDirPrefix := "from-flag-"
 	flagGitLocation := "github.com/from-flag"
 	flagLogLevel := zerolog.WarnLevel
-	_, err := parser.Parse([]string{
+	_, err := harness.parse(
+		t,
 		"--config-file", configPath,
 		"--log-level", "warn",
 		"create",
@@ -178,16 +186,16 @@ func TestConfigFileLoadsAndFlagsOverrideIt(t *testing.T) {
 		"--git-location", flagGitLocation,
 		"cooltool",
 		"CLI tool that does some cool stuff",
-	})
+	)
 	require.NoError(t, err)
 
 	assert.Equal(t, "/from-flag", appConfig.RootPath)
 	assert.Equal(t, "from-flag-", appConfig.ProjectDirPrefix)
 	assert.Equal(t, "github.com/from-flag", appConfig.GitLocation)
 	assert.Equal(t, flagLogLevel, appConfig.LogLevel)
-	assert.Equal(t, -1, exitCode)
-	assert.Empty(t, stdout.String())
-	assert.Empty(t, stderr.String())
+	assert.Equal(t, -1, harness.exitCode)
+	assert.Empty(t, harness.stdoutString())
+	assert.Empty(t, harness.stderrString())
 }
 
 func TestConfigCommandWritesMergedConfigToFile(t *testing.T) {
@@ -204,23 +212,18 @@ func TestConfigCommandWritesMergedConfigToFile(t *testing.T) {
 		),
 	)
 
-	cli := &CLI{}
 	appConfig := appconfig.Default()
-	var stdout bytes.Buffer
-	var stderr bytes.Buffer
-	exitCode := -1
+	harness := newCLITestHarness(t, appConfig)
 
-	parser := newTestParser(t, cli, appConfig, &stdout, &stderr, &exitCode)
-
-	ctx, err := parser.Parse([]string{
+	ctx, err := harness.parse(
+		t,
 		"--config-file", configPath,
 		"config",
 		"--output", outputPath,
-	})
+	)
 	require.NoError(t, err)
 
-	log := zerolog.New(&bytes.Buffer{})
-	err = cliutil.Run(ctx, log)
+	err = harness.run(t, ctx)
 	require.NoError(t, err)
 
 	data, err := os.ReadFile(outputPath)
@@ -235,6 +238,6 @@ func TestConfigCommandWritesMergedConfigToFile(t *testing.T) {
 	assert.True(t, got.PostSteps.GoModTidy)
 	assert.True(t, got.PostSteps.GitInit)
 	assert.False(t, got.PostSteps.GitCommit)
-	assert.Equal(t, -1, exitCode)
-	assert.Empty(t, stderr.String())
+	assert.Equal(t, -1, harness.exitCode)
+	assert.Empty(t, harness.stderrString())
 }
