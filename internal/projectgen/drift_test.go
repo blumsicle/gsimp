@@ -88,6 +88,11 @@ var exactDriftTemplates = []exactDriftTemplate{
 		template:   "templates/internal/appconfig/root.go.tmpl",
 	},
 	{
+		name:       "appconfig root override tests",
+		sourcePath: "internal/appconfig/root_test.go",
+		template:   "templates/internal/appconfig/root_test.go.tmpl",
+	},
+	{
 		name:       "cli build info",
 		sourcePath: "internal/cli/buildinfo.go",
 		template:   "templates/internal/cli/buildinfo.go.tmpl",
@@ -171,12 +176,6 @@ var intentionallyDivergentTemplates = []divergentTemplate{
 		sourcePath: "internal/appconfig/normalize_test.go",
 		template:   "templates/internal/appconfig/normalize_test.go.tmpl",
 		reason:     "generated normalize tests use project-specific environment variable names",
-	},
-	{
-		name:       "appconfig root override tests",
-		sourcePath: "internal/appconfig/root_test.go",
-		template:   "templates/internal/appconfig/root_test.go.tmpl",
-		reason:     "kept documented until generated appconfig tests are evaluated for exact drift coverage as a group",
 	},
 }
 

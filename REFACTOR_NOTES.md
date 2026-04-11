@@ -72,6 +72,9 @@ Status values:
   - 2026-04-11: Added drift classification coverage so every scaffold
     template must be listed as either exact-match drift-checked or
     intentionally divergent.
+  - 2026-04-11: Promoted generated appconfig root override tests to
+    exact-match drift coverage after verifying they match canonical
+    source.
 
 ### 2. Split `Generator.Generate` into smaller private steps
 
