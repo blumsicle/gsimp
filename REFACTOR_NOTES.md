@@ -10,9 +10,9 @@ Status values:
 
 ## Backlog
 
-### 1. Reduce repo/template duplication
+### 1. Manage repo/template duplication
 
-- Status: `pending`
+- Status: `done`
 - Priority: high
 - Summary:
   The real CLI/runtime code and the generated template code mirror each
@@ -54,6 +54,18 @@ Status values:
   - 2026-04-11: Moved drift coverage into a dedicated projectgen test
     file and documented intentionally divergent source/template pairs
     so future drift additions have explicit boundaries.
+  - 2026-04-11: Completed the practical duplication-management pass by
+    keeping generation template-based, grouping related code into
+    focused files, and guarding matching canonical/template pairs with
+    drift tests.
+  - 2026-04-11: Split real and generated root CLI smoke tests into
+    focused harness, root, completion, config, and command-specific test
+    files; added drift coverage for the shared harness and completion
+    tests.
+  - 2026-04-11: Moved completion command behavior tests into the
+    completion command package and generated completion package
+    template, leaving root CLI tests responsible for command tree
+    wiring.
 
 ### 2. Split `Generator.Generate` into smaller private steps
 
@@ -142,10 +154,30 @@ Status values:
     generated CLI smoke tests to centralize parser, output buffer, and
     exit-code setup.
 
+### 7. Evaluate shared helpers for intentionally divergent templates
+
+- Status: `pending`
+- Priority: low
+- Summary:
+  Some real and generated files share patterns but intentionally differ
+  by command domain or config schema. These should be evaluated for
+  helper extraction only when the shared behavior is stable enough to
+  avoid brittle template normalization.
+- Key references:
+  - [internal/projectgen/drift_test.go](/Users/blumsicle/src/go/bcli/internal/projectgen/drift_test.go)
+  - [cmd/bcli/cli.go](/Users/blumsicle/src/go/bcli/cmd/bcli/cli.go)
+  - [internal/projectgen/templates/cmd/__NAME__/cli.go.tmpl](/Users/blumsicle/src/go/bcli/internal/projectgen/templates/cmd/__NAME__/cli.go.tmpl)
+  - [cmd/bcli/main_test.go](/Users/blumsicle/src/go/bcli/cmd/bcli/main_test.go)
+  - [internal/projectgen/templates/cmd/__NAME__/main_test.go.tmpl](/Users/blumsicle/src/go/bcli/internal/projectgen/templates/cmd/__NAME__/main_test.go.tmpl)
+- Progress notes:
+  - 2026-04-11: Documented divergent template/source pairs in drift
+    tests instead of forcing exact matches with broad normalization.
+
 ## Suggested Order
 
-1. Reduce repo/template duplication.
+1. Manage repo/template duplication.
 2. Split `Generator.Generate`.
 3. Centralize config override application.
 4. Simplify post-step definitions and implementations.
 5. Add a CLI test harness helper.
+6. Evaluate shared helpers for intentionally divergent templates.

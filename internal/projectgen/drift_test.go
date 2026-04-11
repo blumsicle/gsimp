@@ -54,6 +54,16 @@ func TestTemplatesMatchCanonicalSourcesWithBCLIData(t *testing.T) {
 			template:   "templates/cmd/__NAME__/config/cmd.go.tmpl",
 		},
 		{
+			name:       "cli test harness",
+			sourcePath: "cmd/bcli/harness_test.go",
+			template:   "templates/cmd/__NAME__/harness_test.go.tmpl",
+		},
+		{
+			name:       "completion command tests",
+			sourcePath: "cmd/bcli/completion/cmd_test.go",
+			template:   "templates/cmd/__NAME__/completion/cmd_test.go.tmpl",
+		},
+		{
 			name:       "appconfig load",
 			sourcePath: "internal/appconfig/load.go",
 			template:   "templates/internal/appconfig/load.go.tmpl",
@@ -115,7 +125,19 @@ func TestIntentionallyDivergentTemplatesAreDocumented(t *testing.T) {
 			name:       "root cli tests",
 			sourcePath: "cmd/bcli/main_test.go",
 			template:   "templates/cmd/__NAME__/main_test.go.tmpl",
-			reason:     "bcli tests create behavior while generated projects test example behavior",
+			reason:     "bcli help includes create while generated project help includes example",
+		},
+		{
+			name:       "config integration tests",
+			sourcePath: "cmd/bcli/config_integration_test.go",
+			template:   "templates/cmd/__NAME__/config_test.go.tmpl",
+			reason:     "bcli config integration tests include create flag precedence and post-step config assertions",
+		},
+		{
+			name:       "example integration tests",
+			sourcePath: "cmd/bcli/create/cmd_test.go",
+			template:   "templates/cmd/__NAME__/example_test.go.tmpl",
+			reason:     "bcli create tests exercise project generation while generated example tests exercise scaffold command wiring",
 		},
 		{
 			name:       "appconfig schema",
