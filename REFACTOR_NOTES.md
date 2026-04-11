@@ -66,6 +66,12 @@ Status values:
     completion command package and generated completion package
     template, leaving root CLI tests responsible for command tree
     wiring.
+  - 2026-04-11: Moved generated config and example command behavior
+    tests into their command package templates so generated root CLI
+    tests stay focused on command tree wiring.
+  - 2026-04-11: Added drift classification coverage so every scaffold
+    template must be listed as either exact-match drift-checked or
+    intentionally divergent.
 
 ### 2. Split `Generator.Generate` into smaller private steps
 

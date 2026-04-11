@@ -1,0 +1,48 @@
+package example
+
+import (
+	"bytes"
+	"testing"
+
+	"{{ .ModulePath }}/cmd"
+	"{{ .ModulePath }}/internal/appconfig"
+	"github.com/rs/zerolog"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+func TestAfterApplyOverridesConfig(t *testing.T) {
+	rootPath := "/tmp/src"
+	gitLocation := "github.com/acme"
+	cfg := appconfig.Default()
+
+	command := Command{
+		RootPath:    &rootPath,
+		GitLocation: &gitLocation,
+	}
+
+	err := command.AfterApply(cfg)
+	require.NoError(t, err)
+
+	assert.Equal(t, rootPath, cfg.RootPath)
+	assert.Equal(t, gitLocation, cfg.GitLocation)
+}
+
+func TestRunNormalizesConfigAndWritesExampleLog(t *testing.T) {
+	t.Setenv("{{ upper .Name }}_TEST_ROOT", t.TempDir())
+	cfg := appconfig.Default()
+	cfg.RootPath = "${{ upper .Name }}_TEST_ROOT/src"
+	cfg.GitLocation = "github.com/acme"
+
+	var logs bytes.Buffer
+	log := zerolog.New(&logs)
+
+	command := Command{}
+	err := command.Run(log, &cmd.Globals{ConfigFile: "/tmp/{{ .Name }}.yaml"}, cfg)
+	require.NoError(t, err)
+
+	assert.Contains(t, logs.String(), "example command")
+	assert.Contains(t, logs.String(), "/tmp/{{ .Name }}.yaml")
+	assert.Contains(t, logs.String(), cfg.RootPath)
+	assert.Contains(t, logs.String(), cfg.GitLocation)
+}
