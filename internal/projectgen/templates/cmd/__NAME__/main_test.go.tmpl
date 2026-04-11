@@ -190,6 +190,51 @@ func TestConfigFileLoadsAndFlagOverridesIt(t *testing.T) {
 	assert.Contains(t, logs.String(), "/from-config")
 }
 
+func TestExampleCommandFlagOverridesConfig(t *testing.T) {
+	configPath := filepath.Join(t.TempDir(), "config.yaml")
+	require.NoError(
+		t,
+		os.WriteFile(
+			configPath,
+			[]byte("root_path: /from-config\ngit_location: github.com/from-config\n"),
+			0o644,
+		),
+	)
+
+	cli := &CLI{}
+	appConfig := appconfig.Default()
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	exitCode := -1
+
+	parser := newTestParser(t, cli, appConfig, &stdout, &stderr, &exitCode)
+
+	flagRootPath := "/from-flag"
+	flagGitLocation := "github.com/from-flag"
+	ctx, err := parser.Parse([]string{
+		"--config-file", configPath,
+		"example",
+		"--root-path", flagRootPath,
+		"--git-location", flagGitLocation,
+	})
+	require.NoError(t, err)
+
+	assert.Equal(t, flagRootPath, appConfig.RootPath)
+	assert.Equal(t, flagGitLocation, appConfig.GitLocation)
+
+	var logs bytes.Buffer
+	log := zerolog.New(&logs)
+
+	err = cliutil.Run(ctx, log)
+	require.NoError(t, err)
+
+	assert.Contains(t, logs.String(), flagRootPath)
+	assert.Contains(t, logs.String(), flagGitLocation)
+	assert.Equal(t, -1, exitCode)
+	assert.Empty(t, stdout.String())
+	assert.Empty(t, stderr.String())
+}
+
 func TestConfigCommandWritesMergedConfigToFile(t *testing.T) {
 	configPath := filepath.Join(t.TempDir(), "config.yaml")
 	outputPath := filepath.Join(t.TempDir(), "resolved.yaml")

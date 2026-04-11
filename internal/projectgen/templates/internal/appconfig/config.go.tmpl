@@ -23,6 +23,12 @@ type RootOverrides struct {
 	LogLevel *zerolog.Level
 }
 
+// ExampleOverrides contains example command flag values that can override config.
+type ExampleOverrides struct {
+	RootPath    *string
+	GitLocation *string
+}
+
 // Default returns a config initialized with built-in defaults.
 func Default() *Config {
 	return &Config{
@@ -37,6 +43,16 @@ func Default() *Config {
 func (c *Config) ApplyRootOverrides(overrides RootOverrides) {
 	if overrides.LogLevel != nil {
 		c.LogLevel = *overrides.LogLevel
+	}
+}
+
+// ApplyExampleOverrides applies example command flag overrides to the config.
+func (c *Config) ApplyExampleOverrides(overrides ExampleOverrides) {
+	if overrides.RootPath != nil {
+		c.RootPath = *overrides.RootPath
+	}
+	if overrides.GitLocation != nil {
+		c.GitLocation = *overrides.GitLocation
 	}
 }
 

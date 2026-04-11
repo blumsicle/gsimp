@@ -9,7 +9,20 @@ import (
 )
 
 // Command is a placeholder subcommand implementation.
-type Command struct{}
+type Command struct {
+	RootPath    *string `short:"r" help:"Override root_path from config"         type:"path" completion:"<directory>"`
+	GitLocation *string `short:"g" help:"Override git_location from config"`
+}
+
+// AfterApply applies command-specific flag overrides to the shared app config.
+func (c *Command) AfterApply(cfg *appconfig.Config) error {
+	cfg.ApplyExampleOverrides(appconfig.ExampleOverrides{
+		RootPath:    c.RootPath,
+		GitLocation: c.GitLocation,
+	})
+
+	return nil
+}
 
 // Run demonstrates how shared globals and app config are injected into handlers.
 func (c *Command) Run(log zerolog.Logger, g *cmd.Globals, cfg *appconfig.Config) error {

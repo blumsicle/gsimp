@@ -74,6 +74,9 @@ func TestGenerateCreatesStarterProject(t *testing.T) {
 	)
 	require.NoError(t, err)
 	assert.Contains(t, string(exampleCmd), "\"github.com/blumsicle/mycommand/cmd\"")
+	assert.Contains(t, string(exampleCmd), "ApplyExampleOverrides")
+	assert.Contains(t, string(exampleCmd), "RootPath")
+	assert.Contains(t, string(exampleCmd), "GitLocation")
 
 	completionCmd, err := os.ReadFile(
 		filepath.Join(targetPath, "cmd", "mycommand", "completion", "cmd.go"),
@@ -126,6 +129,7 @@ func TestGenerateUsesProjectNameAsModulePathWhenGitLocationIsEmpty(t *testing.T)
 	)
 	require.NoError(t, err)
 	assert.Contains(t, string(exampleCmd), "\"mycommand/cmd\"")
+	assert.Contains(t, string(exampleCmd), "ApplyExampleOverrides")
 }
 
 func TestGenerateUsesCurrentDirectoryWhenRootPathIsEmpty(t *testing.T) {

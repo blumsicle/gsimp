@@ -9,6 +9,10 @@ Generate and run a Go CLI tool built with Kong and zerolog.
 `{{ .Name }} example` runs the example subcommand included in the
 generated project.
 
+The example subcommand demonstrates command-specific config overrides:
+
+`{{ .Name }} example --root-path ~/src --git-location github.com/your-org`
+
 Configuration can be loaded from the file pointed to by
 `--config-file`. The generated CLI currently supports these YAML keys:
 
@@ -79,6 +83,9 @@ The generated project includes:
 - `{{ .Name }} completion <shell>` prints a completion script for
   `zsh`, `bash`, or `fish`.
 - `{{ .Name }} example` runs the example subcommand.
+- `{{ .Name }} example --root-path ~/src --git-location
+  github.com/your-org` runs the example subcommand with flag overrides
+  for config values.
 - `make build` builds versioned binaries into `bin/`.
 - `make rebuild` forces a rebuild of versioned binaries.
 - `make install` installs the current CLI.
