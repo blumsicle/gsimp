@@ -1,6 +1,7 @@
 package projectgen
 
 import (
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -91,6 +92,54 @@ func TestTemplatesMatchCanonicalSourcesWithBCLIData(t *testing.T) {
 	}
 }
 
+func TestIntentionallyDivergentTemplatesAreDocumented(t *testing.T) {
+	tests := []struct {
+		name       string
+		sourcePath string
+		template   string
+		reason     string
+	}{
+		{
+			name:       "readme",
+			sourcePath: "README.md",
+			template:   "templates/README.md.tmpl",
+			reason:     "the repo README documents bcli as a generator; the scaffold README documents a generated CLI app",
+		},
+		{
+			name:       "root cli",
+			sourcePath: "cmd/bcli/cli.go",
+			template:   "templates/cmd/__NAME__/cli.go.tmpl",
+			reason:     "bcli exposes create while generated projects expose example",
+		},
+		{
+			name:       "root cli tests",
+			sourcePath: "cmd/bcli/main_test.go",
+			template:   "templates/cmd/__NAME__/main_test.go.tmpl",
+			reason:     "bcli tests create behavior while generated projects test example behavior",
+		},
+		{
+			name:       "appconfig schema",
+			sourcePath: "internal/appconfig/config.go",
+			template:   "templates/internal/appconfig/config.go.tmpl",
+			reason:     "bcli includes post-step config while generated projects use a smaller scaffold config",
+		},
+		{
+			name:       "command overrides",
+			sourcePath: "internal/appconfig/create.go",
+			template:   "templates/internal/appconfig/example.go.tmpl",
+			reason:     "bcli create overrides and generated example overrides share a pattern but represent different command domains",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.FileExists(t, repoPath(tt.sourcePath))
+			assertTemplateExists(t, tt.template)
+			assert.NotEmpty(t, tt.reason)
+		})
+	}
+}
+
 func renderTemplateWithBCLIData(t *testing.T, templatePath string) string {
 	t.Helper()
 
@@ -106,6 +155,13 @@ func renderTemplateWithBCLIData(t *testing.T, templatePath string) string {
 	require.NoError(t, err)
 
 	return got
+}
+
+func assertTemplateExists(t *testing.T, templatePath string) {
+	t.Helper()
+
+	_, err := fs.Stat(templateFS, templatePath)
+	require.NoError(t, err)
 }
 
 func repoPath(relativePath string) string {

@@ -51,6 +51,9 @@ Status values:
   - 2026-04-11: Added exact-match drift coverage for non-Go scaffold
     files that should mirror the repo, covering `.gitignore`,
     `Makefile`, and `go.mod`.
+  - 2026-04-11: Moved drift coverage into a dedicated projectgen test
+    file and documented intentionally divergent source/template pairs
+    so future drift additions have explicit boundaries.
 
 ### 2. Split `Generator.Generate` into smaller private steps
 
