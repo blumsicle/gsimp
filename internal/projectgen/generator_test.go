@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	scaffoldsrc "github.com/blumsicle/bcli"
 	"github.com/blumsicle/bcli/internal/poststep"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
@@ -44,6 +45,9 @@ func TestGenerateCreatesStarterProject(t *testing.T) {
 	assert.FileExists(t, filepath.Join(targetPath, "internal", "appconfig", "config.go"))
 	assert.FileExists(t, filepath.Join(targetPath, "internal", "appconfig", "load.go"))
 	assert.FileExists(t, filepath.Join(targetPath, "internal", "appconfig", "config_test.go"))
+	assertGeneratedFileMatchesSource(t, targetPath, "internal/appconfig/load.go")
+	assertGeneratedFileMatchesSource(t, targetPath, "internal/cli/buildinfo.go")
+	assertGeneratedFileMatchesSource(t, targetPath, "internal/cli/runner.go")
 
 	configTest, err := os.ReadFile(
 		filepath.Join(targetPath, "internal", "appconfig", "config_test.go"),
@@ -186,6 +190,38 @@ func TestGenerateFailsWhenTargetExists(t *testing.T) {
 	assert.Contains(t, err.Error(), "target path already exists")
 }
 
+func TestEmbeddedStaticFilesMatchCanonicalSources(t *testing.T) {
+	for _, file := range staticFiles {
+		t.Run(file.outputPath, func(t *testing.T) {
+			source, err := os.ReadFile(repoPath(file.sourcePath))
+			require.NoError(t, err)
+
+			staticContent, err := scaffoldsrc.ScaffoldSourceFS.ReadFile(file.sourcePath)
+			require.NoError(t, err)
+
+			assert.Equal(t, string(source), string(staticContent))
+		})
+	}
+}
+
+func TestMainTemplateMatchesBCLIMainWithBCLIData(t *testing.T) {
+	got, err := New(zerolog.Nop()).renderTemplate(
+		"templates/cmd/__NAME__/main.go.tmpl",
+		templateData{
+			Name:        "bcli",
+			Description: "Generate starter Go CLI projects",
+			ModulePath:  "github.com/blumsicle/bcli",
+			GoVersion:   currentGoVersion(),
+		},
+	)
+	require.NoError(t, err)
+
+	want, err := os.ReadFile(repoPath("cmd/bcli/main.go"))
+	require.NoError(t, err)
+
+	assert.Equal(t, string(want), got)
+}
+
 type recordingPostStep struct {
 	name    string
 	ran     *bool
@@ -261,4 +297,20 @@ func TestGenerateStopsOnPostStepError(t *testing.T) {
 	require.Error(t, err)
 	assert.ErrorContains(t, err, `run post step "first"`)
 	assert.Equal(t, []string{"first"}, visited)
+}
+
+func assertGeneratedFileMatchesSource(t *testing.T, targetPath string, relativePath string) {
+	t.Helper()
+
+	source, err := os.ReadFile(repoPath(relativePath))
+	require.NoError(t, err)
+
+	generated, err := os.ReadFile(filepath.Join(targetPath, relativePath))
+	require.NoError(t, err)
+
+	assert.Equal(t, string(source), string(generated))
+}
+
+func repoPath(relativePath string) string {
+	return filepath.Join("..", "..", filepath.FromSlash(relativePath))
 }

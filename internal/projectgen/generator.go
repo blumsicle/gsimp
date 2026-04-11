@@ -15,6 +15,7 @@ import (
 	"strings"
 	"text/template"
 
+	scaffoldsrc "github.com/blumsicle/bcli"
 	cliutil "github.com/blumsicle/bcli/internal/cli"
 	"github.com/blumsicle/bcli/internal/poststep"
 	"github.com/rs/zerolog"
@@ -45,6 +46,26 @@ type generationPlan struct {
 	modulePath    string
 	templateData  templateData
 	postStepInput poststep.PostStepInput
+}
+
+type staticFile struct {
+	sourcePath string
+	outputPath string
+}
+
+var staticFiles = []staticFile{
+	{
+		sourcePath: "internal/appconfig/load.go",
+		outputPath: "internal/appconfig/load.go",
+	},
+	{
+		sourcePath: "internal/cli/buildinfo.go",
+		outputPath: "internal/cli/buildinfo.go",
+	},
+	{
+		sourcePath: "internal/cli/runner.go",
+		outputPath: "internal/cli/runner.go",
+	},
 }
 
 // Generator renders embedded project templates and runs post-generation steps.
@@ -93,6 +114,9 @@ func (g *Generator) Generate(ctx context.Context, cfg Config) (string, error) {
 		return "", err
 	}
 	if err := g.renderTemplates(plan.targetPath, plan.templateData); err != nil {
+		return "", err
+	}
+	if err := g.copyStaticFiles(plan.targetPath); err != nil {
 		return "", err
 	}
 	if err := g.runPostSteps(ctx, plan.postStepInput); err != nil {
@@ -178,12 +202,27 @@ func (g *Generator) renderTemplates(targetPath string, data templateData) error 
 			return fmt.Errorf("render file %q: %w", relativePath, err)
 		}
 
-		fullPath := filepath.Join(targetPath, relativePath)
-		if err := os.MkdirAll(filepath.Dir(fullPath), 0o755); err != nil {
-			return fmt.Errorf("create parent directory for %q: %w", relativePath, err)
+		if err := writeFile(targetPath, relativePath, []byte(content)); err != nil {
+			return err
 		}
-		if err := os.WriteFile(fullPath, []byte(content), 0o644); err != nil {
-			return fmt.Errorf("write %q: %w", relativePath, err)
+	}
+
+	return nil
+}
+
+func (g *Generator) copyStaticFiles(targetPath string) error {
+	for _, file := range staticFiles {
+		g.log.Debug().
+			Str("source_path", file.sourcePath).
+			Str("output_path", file.outputPath).
+			Msg("copying static file")
+		content, err := fs.ReadFile(scaffoldsrc.ScaffoldSourceFS, file.sourcePath)
+		if err != nil {
+			return fmt.Errorf("read static file %q: %w", file.sourcePath, err)
+		}
+
+		if err := writeFile(targetPath, file.outputPath, content); err != nil {
+			return err
 		}
 	}
 
@@ -254,6 +293,18 @@ func outputPath(templatePath string, data templateData) string {
 	path = strings.TrimSuffix(path, ".tmpl")
 	path = strings.ReplaceAll(path, "__NAME__", data.Name)
 	return path
+}
+
+func writeFile(targetPath string, relativePath string, content []byte) error {
+	fullPath := filepath.Join(targetPath, relativePath)
+	if err := os.MkdirAll(filepath.Dir(fullPath), 0o755); err != nil {
+		return fmt.Errorf("create parent directory for %q: %w", relativePath, err)
+	}
+	if err := os.WriteFile(fullPath, content, 0o644); err != nil {
+		return fmt.Errorf("write %q: %w", relativePath, err)
+	}
+
+	return nil
 }
 
 func modulePath(gitLocation string, name string) string {
