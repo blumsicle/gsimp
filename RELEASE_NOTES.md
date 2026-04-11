@@ -1,5 +1,35 @@
 # Release Notes
 
+## v0.2.4 - 2026-04-11
+
+Improves generated project configuration ergonomics and strengthens
+template maintenance with drift coverage and focused file organization.
+
+### Highlights
+
+- Added environment, `~`, and `~user` expansion for config paths before
+  command execution.
+- Added reusable config override helpers for root and command-level
+  flags, including generated example command overrides.
+- Updated generated projects to show config-value overrides through
+  example command flags.
+- Split appconfig, project generation, and CLI smoke tests into more
+  focused files in both the repository and generated scaffolds.
+- Added scaffold drift tests that compare matching templates to
+  canonical `bcli` source and require every template to be classified as
+  exact-match or intentionally divergent.
+- Simplified project generation and post-step internals with smaller
+  planning, template, and command-backed step helpers.
+
+### Notes
+
+- Generation remains template-based for all scaffold files so files can
+  gain template substitutions later without changing copy modes.
+- Generated project layout changed for tests: command-specific behavior
+  tests now live next to their command packages.
+- This remains a `0.x` release, so generated output and command surface
+  may still evolve before a `v1.0.0` stability commitment.
+
 ## v0.2.3 - 2026-04-07
 
 Adds first-party shell completion support and propagates the current
