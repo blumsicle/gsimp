@@ -21,12 +21,16 @@ const (
 	StepGitCommit StepID = "git_commit"
 )
 
-// Definition describes one post-generation step and its planning rules.
-type Definition struct {
-	ID       StepID
-	PostStep PostStep
-	Requires []StepID
-	Enabled  func(cfg *appconfig.PostStepsConfig) bool
+type definitionSpec struct {
+	id       StepID
+	requires []StepID
+}
+
+var postStepDefinitions = []definitionSpec{
+	{id: StepGoGetUpdate},
+	{id: StepGoModTidy},
+	{id: StepGitInit},
+	{id: StepGitCommit, requires: []StepID{StepGitInit}},
 }
 
 // Planner builds the ordered post-step plan for a generator run.
@@ -43,69 +47,34 @@ func NewPlanner(log zerolog.Logger, cfg *appconfig.PostStepsConfig) *Planner {
 	}
 }
 
-// Definitions returns the ordered post-step definitions used by the generator.
-func (p *Planner) Definitions() []Definition {
-	return []Definition{
-		{
-			ID:       StepGoGetUpdate,
-			PostStep: GoGetUpdatePostStep{log: p.log},
-			Enabled: func(cfg *appconfig.PostStepsConfig) bool {
-				return cfg.GoGetUpdate
-			},
-		},
-		{
-			ID:       StepGoModTidy,
-			PostStep: GoModTidyPostStep{log: p.log},
-			Enabled: func(cfg *appconfig.PostStepsConfig) bool {
-				return cfg.GoModTidy
-			},
-		},
-		{
-			ID:       StepGitInit,
-			PostStep: GitInitPostStep{log: p.log},
-			Enabled: func(cfg *appconfig.PostStepsConfig) bool {
-				return cfg.GitInit
-			},
-		},
-		{
-			ID:       StepGitCommit,
-			PostStep: GitCommitPostStep{log: p.log},
-			Requires: []StepID{StepGitInit},
-			Enabled: func(cfg *appconfig.PostStepsConfig) bool {
-				return cfg.GitCommit
-			},
-		},
-	}
-}
-
 // Planned returns the enabled post steps in execution order after applying dependencies.
 func (p *Planner) Planned() []PostStep {
-	definitions := p.Definitions()
+	definitions := postStepDefinitions
 	enabled := make(map[StepID]bool, len(definitions))
 
 	for _, definition := range definitions {
-		enabled[definition.ID] = definition.Enabled(p.cfg)
+		enabled[definition.id] = definition.enabled(p.cfg)
 		p.log.Debug().
-			Str("step_id", string(definition.ID)).
-			Bool("enabled", enabled[definition.ID]).
+			Str("step_id", string(definition.id)).
+			Bool("enabled", enabled[definition.id]).
 			Msg("evaluated post-step config")
 	}
 
 	steps := make([]PostStep, 0, len(definitions))
 	for _, definition := range definitions {
-		if !enabled[definition.ID] {
+		if !enabled[definition.id] {
 			p.log.Debug().
-				Str("step_id", string(definition.ID)).
+				Str("step_id", string(definition.id)).
 				Msg("skipping disabled post step")
 			continue
 		}
 
 		satisfied := true
-		for _, dependency := range definition.Requires {
+		for _, dependency := range definition.requires {
 			if !enabled[dependency] {
 				satisfied = false
 				p.log.Debug().
-					Str("step_id", string(definition.ID)).
+					Str("step_id", string(definition.id)).
 					Str("dependency", string(dependency)).
 					Msg("skipping post step because dependency is disabled")
 				break
@@ -115,12 +84,43 @@ func (p *Planner) Planned() []PostStep {
 			continue
 		}
 
+		step := definition.postStep(p.log)
 		p.log.Info().
-			Str("step_id", string(definition.ID)).
-			Str("name", definition.PostStep.Name()).
+			Str("step_id", string(definition.id)).
+			Str("name", step.Name()).
 			Msg("selected post step")
-		steps = append(steps, definition.PostStep)
+		steps = append(steps, step)
 	}
 
 	return steps
+}
+
+func (d definitionSpec) enabled(cfg *appconfig.PostStepsConfig) bool {
+	switch d.id {
+	case StepGoGetUpdate:
+		return cfg.GoGetUpdate
+	case StepGoModTidy:
+		return cfg.GoModTidy
+	case StepGitInit:
+		return cfg.GitInit
+	case StepGitCommit:
+		return cfg.GitCommit
+	default:
+		return false
+	}
+}
+
+func (d definitionSpec) postStep(log zerolog.Logger) PostStep {
+	switch d.id {
+	case StepGoGetUpdate:
+		return GoGetUpdatePostStep{log: log}
+	case StepGoModTidy:
+		return GoModTidyPostStep{log: log}
+	case StepGitInit:
+		return GitInitPostStep{log: log}
+	case StepGitCommit:
+		return GitCommitPostStep{log: log}
+	default:
+		return nil
+	}
 }

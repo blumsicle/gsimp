@@ -70,7 +70,7 @@ Status values:
 
 ### 4. Simplify post-step definitions and planning
 
-- Status: `pending`
+- Status: `done`
 - Priority: medium
 - Summary:
   The planner rebuilds the definition table on each call and uses small
@@ -80,6 +80,9 @@ Status values:
 - Progress notes:
   - 2026-04-09: A more static definition table plus lightweight step
     factories would likely be easier to scan and maintain.
+  - 2026-04-11: Moved planner definitions to a static private table and
+    replaced per-call anonymous enabled closures with small spec methods
+    for enabled-state checks and step construction.
 
 ### 5. Factor repetitive command-backed post-step implementations
 

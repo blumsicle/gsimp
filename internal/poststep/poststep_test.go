@@ -77,6 +77,66 @@ func TestGoModTidyPostStepRunsExpectedCommand(t *testing.T) {
 	assert.Equal(t, []string{"mod", "tidy"}, args)
 }
 
+func TestPlannedReturnsDefaultStepsInOrder(t *testing.T) {
+	cfg := appconfig.Default()
+
+	steps := NewPlanner(zerolog.Nop(), &cfg.PostSteps).Planned()
+
+	assert.Equal(
+		t,
+		[]string{"go get -u ./...", "go mod tidy", "git init", "git commit"},
+		postStepNames(steps),
+	)
+}
+
+func TestPlannedSkipsDisabledSteps(t *testing.T) {
+	tests := []struct {
+		name      string
+		configure func(cfg *appconfig.PostStepsConfig)
+		want      []string
+	}{
+		{
+			name: "go get update",
+			configure: func(cfg *appconfig.PostStepsConfig) {
+				cfg.GoGetUpdate = false
+			},
+			want: []string{"go mod tidy", "git init", "git commit"},
+		},
+		{
+			name: "go mod tidy",
+			configure: func(cfg *appconfig.PostStepsConfig) {
+				cfg.GoModTidy = false
+			},
+			want: []string{"go get -u ./...", "git init", "git commit"},
+		},
+		{
+			name: "git init",
+			configure: func(cfg *appconfig.PostStepsConfig) {
+				cfg.GitInit = false
+			},
+			want: []string{"go get -u ./...", "go mod tidy"},
+		},
+		{
+			name: "git commit",
+			configure: func(cfg *appconfig.PostStepsConfig) {
+				cfg.GitCommit = false
+			},
+			want: []string{"go get -u ./...", "go mod tidy", "git init"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg := appconfig.Default()
+			tt.configure(&cfg.PostSteps)
+
+			steps := NewPlanner(zerolog.Nop(), &cfg.PostSteps).Planned()
+
+			assert.Equal(t, tt.want, postStepNames(steps))
+		})
+	}
+}
+
 func TestPlannedDisablesGitCommitWhenGitInitIsDisabled(t *testing.T) {
 	cfg := appconfig.Default()
 	cfg.PostSteps.GitInit = false
@@ -84,11 +144,10 @@ func TestPlannedDisablesGitCommitWhenGitInitIsDisabled(t *testing.T) {
 
 	steps := NewPlanner(zerolog.Nop(), &cfg.PostSteps).Planned()
 
-	require.Len(t, steps, 2)
 	assert.Equal(
 		t,
 		[]string{"go get -u ./...", "go mod tidy"},
-		[]string{steps[0].Name(), steps[1].Name()},
+		postStepNames(steps),
 	)
 }
 
@@ -187,4 +246,13 @@ func TestGitCommitPostStepStopsOnError(t *testing.T) {
 	)
 	require.ErrorIs(t, err, expectedErr)
 	assert.Equal(t, 1, calls)
+}
+
+func postStepNames(steps []PostStep) []string {
+	names := make([]string, 0, len(steps))
+	for _, step := range steps {
+		names = append(names, step.Name())
+	}
+
+	return names
 }
