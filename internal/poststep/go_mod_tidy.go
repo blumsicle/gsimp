@@ -14,11 +14,17 @@ type GoModTidyPostStep struct {
 
 // Name returns the human-readable name of the post step.
 func (GoModTidyPostStep) Name() string {
-	return "go mod tidy"
+	return goModTidySpec.name
 }
 
 // Run executes `go mod tidy` in the generated project.
 func (s GoModTidyPostStep) Run(ctx context.Context, input PostStepInput) error {
-	s.log.Info().Str("project_path", input.ProjectPath).Msg("tidying module metadata")
-	return run(ctx, s.log, input.ProjectPath, "go", "mod", "tidy")
+	return goModTidySpec.run(ctx, s.log, input)
+}
+
+var goModTidySpec = commandPostStepSpec{
+	name:    "go mod tidy",
+	message: "tidying module metadata",
+	command: "go",
+	args:    []string{"mod", "tidy"},
 }

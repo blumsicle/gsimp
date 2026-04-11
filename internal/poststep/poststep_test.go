@@ -77,6 +77,26 @@ func TestGoModTidyPostStepRunsExpectedCommand(t *testing.T) {
 	assert.Equal(t, []string{"mod", "tidy"}, args)
 }
 
+func TestCommandPostStepSpecReturnsRunError(t *testing.T) {
+	expectedErr := errors.New("boom")
+	previousRun := run
+	run = func(_ context.Context, _ zerolog.Logger, _ string, _ string, _ ...string) error {
+		return expectedErr
+	}
+	t.Cleanup(func() {
+		run = previousRun
+	})
+
+	err := commandPostStepSpec{
+		name:    "test",
+		message: "testing command",
+		command: "test",
+		args:    []string{"arg"},
+	}.run(context.Background(), zerolog.Nop(), PostStepInput{ProjectPath: "/tmp/project"})
+
+	require.ErrorIs(t, err, expectedErr)
+}
+
 func TestPlannedReturnsDefaultStepsInOrder(t *testing.T) {
 	cfg := appconfig.Default()
 

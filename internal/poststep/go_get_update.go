@@ -14,11 +14,17 @@ type GoGetUpdatePostStep struct {
 
 // Name returns the human-readable name of the post step.
 func (GoGetUpdatePostStep) Name() string {
-	return "go get -u ./..."
+	return goGetUpdateSpec.name
 }
 
 // Run executes `go get -u ./...` in the generated project.
 func (s GoGetUpdatePostStep) Run(ctx context.Context, input PostStepInput) error {
-	s.log.Info().Str("project_path", input.ProjectPath).Msg("updating module dependencies")
-	return run(ctx, s.log, input.ProjectPath, "go", "get", "-u", "./...")
+	return goGetUpdateSpec.run(ctx, s.log, input)
+}
+
+var goGetUpdateSpec = commandPostStepSpec{
+	name:    "go get -u ./...",
+	message: "updating module dependencies",
+	command: "go",
+	args:    []string{"get", "-u", "./..."},
 }

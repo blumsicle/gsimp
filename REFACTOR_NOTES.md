@@ -86,7 +86,7 @@ Status values:
 
 ### 5. Factor repetitive command-backed post-step implementations
 
-- Status: `pending`
+- Status: `done`
 - Priority: medium
 - Summary:
   Several post-step implementations only differ by step name, log
@@ -99,6 +99,8 @@ Status values:
 - Progress notes:
   - 2026-04-09: `git commit` likely remains custom, but the
     single-command steps could be collapsed behind a small helper type.
+  - 2026-04-11: Added shared private command post-step specs for the
+    single-command steps while keeping `git commit` custom.
 
 ### 6. Introduce a small CLI test harness helper
 

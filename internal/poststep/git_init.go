@@ -14,11 +14,17 @@ type GitInitPostStep struct {
 
 // Name returns the human-readable name of the post step.
 func (GitInitPostStep) Name() string {
-	return "git init"
+	return gitInitSpec.name
 }
 
 // Run initializes Git in the generated project.
 func (s GitInitPostStep) Run(ctx context.Context, input PostStepInput) error {
-	s.log.Info().Str("project_path", input.ProjectPath).Msg("initializing git repository")
-	return run(ctx, s.log, input.ProjectPath, "git", "init")
+	return gitInitSpec.run(ctx, s.log, input)
+}
+
+var gitInitSpec = commandPostStepSpec{
+	name:    "git init",
+	message: "initializing git repository",
+	command: "git",
+	args:    []string{"init"},
 }
