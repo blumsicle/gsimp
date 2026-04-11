@@ -39,6 +39,14 @@ type templateData struct {
 	GoVersion   string
 }
 
+type generationPlan struct {
+	rootPath      string
+	targetPath    string
+	modulePath    string
+	templateData  templateData
+	postStepInput poststep.PostStepInput
+}
+
 // Generator renders embedded project templates and runs post-generation steps.
 type Generator struct {
 	templateFS fs.FS
@@ -63,53 +71,99 @@ func (g *Generator) AddPostStep(step poststep.PostStep) {
 
 // Generate renders the scaffold into the target directory and runs post steps.
 func (g *Generator) Generate(ctx context.Context, cfg Config) (string, error) {
-	if cfg.Name == "" {
-		return "", fmt.Errorf("name is required")
-	}
-	if cfg.Description == "" {
-		return "", fmt.Errorf("description is required")
+	if err := validateConfig(cfg); err != nil {
+		return "", err
 	}
 
+	plan := newGenerationPlan(cfg)
+	g.log.Info().
+		Str("name", cfg.Name).
+		Str("project_dir_prefix", cfg.ProjectDirPrefix).
+		Str("root_path", filepath.Clean(plan.rootPath)).
+		Str("target_path", filepath.Clean(plan.targetPath)).
+		Msg("starting project generation")
+
+	g.log.Debug().
+		Str("name", cfg.Name).
+		Str("module_path", plan.modulePath).
+		Str("go_version", plan.templateData.GoVersion).
+		Msg("resolved module path")
+
+	if err := ensureTargetDir(plan.targetPath); err != nil {
+		return "", err
+	}
+	if err := g.renderTemplates(plan.targetPath, plan.templateData); err != nil {
+		return "", err
+	}
+	if err := g.runPostSteps(ctx, plan.postStepInput); err != nil {
+		return "", err
+	}
+
+	g.log.Info().
+		Str("name", cfg.Name).
+		Str("target_path", filepath.Clean(plan.targetPath)).
+		Msg("finished project generation")
+
+	return plan.targetPath, nil
+}
+
+func validateConfig(cfg Config) error {
+	if cfg.Name == "" {
+		return fmt.Errorf("name is required")
+	}
+	if cfg.Description == "" {
+		return fmt.Errorf("description is required")
+	}
+
+	return nil
+}
+
+func newGenerationPlan(cfg Config) generationPlan {
 	rootPath := cfg.RootPath
 	if rootPath == "" {
 		rootPath = "."
 	}
 
 	targetPath := filepath.Join(rootPath, cfg.ProjectDirPrefix+cfg.Name)
-	g.log.Info().
-		Str("name", cfg.Name).
-		Str("project_dir_prefix", cfg.ProjectDirPrefix).
-		Str("root_path", filepath.Clean(rootPath)).
-		Str("target_path", filepath.Clean(targetPath)).
-		Msg("starting project generation")
-
-	if _, err := os.Stat(targetPath); err == nil {
-		return "", fmt.Errorf("target path already exists: %s", targetPath)
-	} else if !os.IsNotExist(err) {
-		return "", fmt.Errorf("stat target path: %w", err)
-	}
-
-	if err := os.MkdirAll(targetPath, 0o755); err != nil {
-		return "", fmt.Errorf("create target directory: %w", err)
-	}
-
 	modulePath := modulePath(cfg.GitLocation, cfg.Name)
-	goVersion := currentGoVersion()
-	g.log.Debug().
-		Str("name", cfg.Name).
-		Str("module_path", modulePath).
-		Str("go_version", goVersion).
-		Msg("resolved module path")
 	data := templateData{
 		Name:        cfg.Name,
 		Description: cfg.Description,
 		ModulePath:  modulePath,
-		GoVersion:   goVersion,
+		GoVersion:   currentGoVersion(),
 	}
 
+	return generationPlan{
+		rootPath:     rootPath,
+		targetPath:   targetPath,
+		modulePath:   modulePath,
+		templateData: data,
+		postStepInput: poststep.PostStepInput{
+			ProjectPath: targetPath,
+			Name:        cfg.Name,
+			ModulePath:  modulePath,
+		},
+	}
+}
+
+func ensureTargetDir(targetPath string) error {
+	if _, err := os.Stat(targetPath); err == nil {
+		return fmt.Errorf("target path already exists: %s", targetPath)
+	} else if !os.IsNotExist(err) {
+		return fmt.Errorf("stat target path: %w", err)
+	}
+
+	if err := os.MkdirAll(targetPath, 0o755); err != nil {
+		return fmt.Errorf("create target directory: %w", err)
+	}
+
+	return nil
+}
+
+func (g *Generator) renderTemplates(targetPath string, data templateData) error {
 	templates, err := g.templatePaths()
 	if err != nil {
-		return "", err
+		return err
 	}
 	g.log.Debug().Int("count", len(templates)).Msg("discovered templates")
 
@@ -121,36 +175,30 @@ func (g *Generator) Generate(ctx context.Context, cfg Config) (string, error) {
 			Msg("rendering template")
 		content, err := g.renderTemplate(templatePath, data)
 		if err != nil {
-			return "", fmt.Errorf("render file %q: %w", relativePath, err)
+			return fmt.Errorf("render file %q: %w", relativePath, err)
 		}
 
 		fullPath := filepath.Join(targetPath, relativePath)
 		if err := os.MkdirAll(filepath.Dir(fullPath), 0o755); err != nil {
-			return "", fmt.Errorf("create parent directory for %q: %w", relativePath, err)
+			return fmt.Errorf("create parent directory for %q: %w", relativePath, err)
 		}
 		if err := os.WriteFile(fullPath, []byte(content), 0o644); err != nil {
-			return "", fmt.Errorf("write %q: %w", relativePath, err)
+			return fmt.Errorf("write %q: %w", relativePath, err)
 		}
 	}
 
-	input := poststep.PostStepInput{
-		ProjectPath: targetPath,
-		Name:        cfg.Name,
-		ModulePath:  modulePath,
-	}
+	return nil
+}
+
+func (g *Generator) runPostSteps(ctx context.Context, input poststep.PostStepInput) error {
 	for _, step := range g.postSteps {
 		g.log.Info().Str("step", step.Name()).Msg("running post step")
 		if err := step.Run(ctx, input); err != nil {
-			return "", fmt.Errorf("run post step %q: %w", step.Name(), err)
+			return fmt.Errorf("run post step %q: %w", step.Name(), err)
 		}
 	}
 
-	g.log.Info().
-		Str("name", cfg.Name).
-		Str("target_path", filepath.Clean(targetPath)).
-		Msg("finished project generation")
-
-	return targetPath, nil
+	return nil
 }
 
 func (g *Generator) templatePaths() ([]string, error) {

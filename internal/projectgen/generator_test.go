@@ -128,6 +128,45 @@ func TestGenerateUsesProjectNameAsModulePathWhenGitLocationIsEmpty(t *testing.T)
 	assert.Contains(t, string(exampleCmd), "\"mycommand/cmd\"")
 }
 
+func TestGenerateUsesCurrentDirectoryWhenRootPathIsEmpty(t *testing.T) {
+	workingDir := t.TempDir()
+	originalWorkingDir, err := os.Getwd()
+	require.NoError(t, err)
+	require.NoError(t, os.Chdir(workingDir))
+	t.Cleanup(func() {
+		require.NoError(t, os.Chdir(originalWorkingDir))
+	})
+
+	targetPath, err := New(zerolog.Nop()).Generate(context.Background(), Config{
+		Name:        "mycommand",
+		Description: "CLI tool that does some cool stuff",
+	})
+	require.NoError(t, err)
+
+	require.Equal(t, "mycommand", targetPath)
+	assert.FileExists(t, filepath.Join(workingDir, "mycommand", "go.mod"))
+}
+
+func TestGenerateFailsWhenNameIsEmpty(t *testing.T) {
+	_, err := New(zerolog.Nop()).Generate(context.Background(), Config{
+		Description: "CLI tool that does some cool stuff",
+		RootPath:    t.TempDir(),
+	})
+
+	require.Error(t, err)
+	assert.EqualError(t, err, "name is required")
+}
+
+func TestGenerateFailsWhenDescriptionIsEmpty(t *testing.T) {
+	_, err := New(zerolog.Nop()).Generate(context.Background(), Config{
+		Name:     "mycommand",
+		RootPath: t.TempDir(),
+	})
+
+	require.Error(t, err)
+	assert.EqualError(t, err, "description is required")
+}
+
 func TestGenerateFailsWhenTargetExists(t *testing.T) {
 	rootPath := t.TempDir()
 	targetPath := filepath.Join(rootPath, "mycommand")
