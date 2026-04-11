@@ -66,7 +66,7 @@ and YAML file loading have been applied:
 
 `bcli config` preserves environment-variable references from the config
 file. `bcli create` normalizes config before generation and currently
-expands environment variables in `root_path`.
+expands environment variables, `~`, and `~user` in `root_path`.
 
 By default, `bcli config` writes YAML to stdout. Use `--output` or `-o`
 to write it to a file instead:

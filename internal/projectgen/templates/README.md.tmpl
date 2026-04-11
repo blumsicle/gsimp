@@ -35,7 +35,8 @@ defaults and config-file loading have been applied:
 
 `{{ .Name }} config` preserves environment-variable references from the
 config file. Commands can call `cfg.Normalize()` when they need
-normalized path values.
+normalized path values. Normalization expands environment variables,
+`~`, and `~user`.
 
 By default, `{{ .Name }} config` writes YAML to stdout. Use `--output`
 or `-o` to write it to a file instead:

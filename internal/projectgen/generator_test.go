@@ -63,8 +63,10 @@ func TestGenerateCreatesStarterProject(t *testing.T) {
 	assert.Contains(
 		t,
 		string(readme),
-		"Run `mycommand config` to generate a config file with the current defaults",
+		"generate a config file with the current\n"+
+			"defaults",
 	)
+	assert.Contains(t, string(readme), "`~`, and `~user`")
 	assert.Contains(t, string(readme), "`mycommand completion zsh`")
 
 	exampleCmd, err := os.ReadFile(
