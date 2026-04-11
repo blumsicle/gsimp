@@ -52,7 +52,7 @@ Status values:
 
 ### 3. Centralize config override application
 
-- Status: `pending`
+- Status: `done`
 - Priority: medium
 - Summary:
   Root-level and command-level config precedence is currently applied in
@@ -64,6 +64,9 @@ Status values:
 - Progress notes:
   - 2026-04-09: Good candidate for explicit `Apply...Overrides` helpers
     on config or config-adjacent types.
+  - 2026-04-11: Added appconfig-owned root and create override helpers
+    so command handlers adapt flag values but no longer own config
+    precedence mutation.
 
 ### 4. Simplify post-step definitions and planning
 

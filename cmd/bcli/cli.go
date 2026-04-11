@@ -29,9 +29,9 @@ func (c *CLI) AfterApply(cfg *appconfig.Config) error {
 		return err
 	}
 
-	if c.LogLevel != nil {
-		cfg.LogLevel = *c.LogLevel
-	}
+	cfg.ApplyRootOverrides(appconfig.RootOverrides{
+		LogLevel: c.LogLevel,
+	})
 
 	return nil
 }

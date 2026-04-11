@@ -18,6 +18,11 @@ type Config struct {
 	LogLevel         zerolog.Level `yaml:"log_level"`
 }
 
+// RootOverrides contains root command flag values that can override config.
+type RootOverrides struct {
+	LogLevel *zerolog.Level
+}
+
 // Default returns a config initialized with built-in defaults.
 func Default() *Config {
 	return &Config{
@@ -25,6 +30,13 @@ func Default() *Config {
 		ProjectDirPrefix: "",
 		GitLocation:      "",
 		LogLevel:         zerolog.InfoLevel,
+	}
+}
+
+// ApplyRootOverrides applies root command flag overrides to the config.
+func (c *Config) ApplyRootOverrides(overrides RootOverrides) {
+	if overrides.LogLevel != nil {
+		c.LogLevel = *overrides.LogLevel
 	}
 }
 

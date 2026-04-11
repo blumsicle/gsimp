@@ -27,27 +27,15 @@ type Command struct {
 
 // AfterApply applies command-specific flag overrides to the shared app config.
 func (c *Command) AfterApply(cfg *appconfig.Config) error {
-	if c.RootPath != nil {
-		cfg.RootPath = *c.RootPath
-	}
-	if c.ProjectDirPrefix != nil {
-		cfg.ProjectDirPrefix = *c.ProjectDirPrefix
-	}
-	if c.GitLocation != nil {
-		cfg.GitLocation = *c.GitLocation
-	}
-	if c.NoGoGetUpdate {
-		cfg.PostSteps.GoGetUpdate = false
-	}
-	if c.NoGoModTidy {
-		cfg.PostSteps.GoModTidy = false
-	}
-	if c.NoGitInit {
-		cfg.PostSteps.GitInit = false
-	}
-	if c.NoGitCommit {
-		cfg.PostSteps.GitCommit = false
-	}
+	cfg.ApplyCreateOverrides(appconfig.CreateOverrides{
+		RootPath:         c.RootPath,
+		ProjectDirPrefix: c.ProjectDirPrefix,
+		GitLocation:      c.GitLocation,
+		NoGoGetUpdate:    c.NoGoGetUpdate,
+		NoGoModTidy:      c.NoGoModTidy,
+		NoGitInit:        c.NoGitInit,
+		NoGitCommit:      c.NoGitCommit,
+	})
 
 	return nil
 }

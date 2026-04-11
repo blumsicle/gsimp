@@ -27,6 +27,22 @@ type Config struct {
 	PostSteps        PostStepsConfig `yaml:"post_steps"`
 }
 
+// RootOverrides contains root command flag values that can override config.
+type RootOverrides struct {
+	LogLevel *zerolog.Level
+}
+
+// CreateOverrides contains create command flag values that can override config.
+type CreateOverrides struct {
+	RootPath         *string
+	ProjectDirPrefix *string
+	GitLocation      *string
+	NoGoGetUpdate    bool
+	NoGoModTidy      bool
+	NoGitInit        bool
+	NoGitCommit      bool
+}
+
 // Default returns a config initialized with built-in defaults.
 func Default() *Config {
 	return &Config{
@@ -40,6 +56,38 @@ func Default() *Config {
 			GitInit:     true,
 			GitCommit:   true,
 		},
+	}
+}
+
+// ApplyRootOverrides applies root command flag overrides to the config.
+func (c *Config) ApplyRootOverrides(overrides RootOverrides) {
+	if overrides.LogLevel != nil {
+		c.LogLevel = *overrides.LogLevel
+	}
+}
+
+// ApplyCreateOverrides applies create command flag overrides to the config.
+func (c *Config) ApplyCreateOverrides(overrides CreateOverrides) {
+	if overrides.RootPath != nil {
+		c.RootPath = *overrides.RootPath
+	}
+	if overrides.ProjectDirPrefix != nil {
+		c.ProjectDirPrefix = *overrides.ProjectDirPrefix
+	}
+	if overrides.GitLocation != nil {
+		c.GitLocation = *overrides.GitLocation
+	}
+	if overrides.NoGoGetUpdate {
+		c.PostSteps.GoGetUpdate = false
+	}
+	if overrides.NoGoModTidy {
+		c.PostSteps.GoModTidy = false
+	}
+	if overrides.NoGitInit {
+		c.PostSteps.GitInit = false
+	}
+	if overrides.NoGitCommit {
+		c.PostSteps.GitCommit = false
 	}
 }
 
