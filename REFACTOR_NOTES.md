@@ -45,6 +45,12 @@ Status values:
   - 2026-04-11: Added exact-match drift tests for rendered templates
     that should match canonical `bcli` source files with `bcli` template
     data, covering shared runtime helpers and common appconfig behavior.
+  - 2026-04-11: Expanded exact-match drift tests to command scaffolding
+    that should match `bcli` with `bcli` template data, covering root
+    globals plus completion and config commands.
+  - 2026-04-11: Added exact-match drift coverage for non-Go scaffold
+    files that should mirror the repo, covering `.gitignore`,
+    `Makefile`, and `go.mod`.
 
 ### 2. Split `Generator.Generate` into smaller private steps
 
