@@ -42,19 +42,27 @@ func TestGenerateCreatesStarterProject(t *testing.T) {
 	)
 
 	assert.FileExists(t, filepath.Join(targetPath, "internal", "appconfig", "config.go"))
+	assert.FileExists(t, filepath.Join(targetPath, "internal", "appconfig", "example.go"))
 	assert.FileExists(t, filepath.Join(targetPath, "internal", "appconfig", "load.go"))
+	assert.FileExists(t, filepath.Join(targetPath, "internal", "appconfig", "normalize.go"))
+	assert.FileExists(t, filepath.Join(targetPath, "internal", "appconfig", "root.go"))
 	assert.FileExists(t, filepath.Join(targetPath, "internal", "appconfig", "config_test.go"))
 
-	configTest, err := os.ReadFile(
-		filepath.Join(targetPath, "internal", "appconfig", "config_test.go"),
+	loadTest, err := os.ReadFile(
+		filepath.Join(targetPath, "internal", "appconfig", "load_test.go"),
 	)
 	require.NoError(t, err)
-	assert.Contains(t, string(configTest), `t.Setenv("MYCOMMAND_TEST_HOME", "/tmp/home")`)
 	assert.Contains(
 		t,
-		string(configTest),
+		string(loadTest),
 		`[]byte("root_path: $MYCOMMAND_TEST_HOME/src\ngit_location: github.com/acme\n")`,
 	)
+
+	normalizeTest, err := os.ReadFile(
+		filepath.Join(targetPath, "internal", "appconfig", "normalize_test.go"),
+	)
+	require.NoError(t, err)
+	assert.Contains(t, string(normalizeTest), `t.Setenv("MYCOMMAND_TEST_HOME", "/tmp/home")`)
 
 	readme, err := os.ReadFile(filepath.Join(targetPath, "README.md"))
 	require.NoError(t, err)

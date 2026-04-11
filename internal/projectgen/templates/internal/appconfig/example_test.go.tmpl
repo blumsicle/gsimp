@@ -1,0 +1,32 @@
+package appconfig
+
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestApplyExampleOverrides(t *testing.T) {
+	rootPath := "/tmp/src"
+	gitLocation := "github.com/acme"
+	cfg := Default()
+
+	cfg.ApplyExampleOverrides(ExampleOverrides{
+		RootPath:    &rootPath,
+		GitLocation: &gitLocation,
+	})
+
+	assert.Equal(t, rootPath, cfg.RootPath)
+	assert.Equal(t, gitLocation, cfg.GitLocation)
+}
+
+func TestApplyExampleOverridesPreservesExistingValuesWhenOmitted(t *testing.T) {
+	cfg := Default()
+	cfg.RootPath = "/existing-root"
+	cfg.GitLocation = "github.com/existing"
+
+	cfg.ApplyExampleOverrides(ExampleOverrides{})
+
+	assert.Equal(t, "/existing-root", cfg.RootPath)
+	assert.Equal(t, "github.com/existing", cfg.GitLocation)
+}

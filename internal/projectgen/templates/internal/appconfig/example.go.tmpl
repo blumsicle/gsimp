@@ -1,0 +1,17 @@
+package appconfig
+
+// ExampleOverrides contains example command flag values that can override config.
+type ExampleOverrides struct {
+	RootPath    *string
+	GitLocation *string
+}
+
+// ApplyExampleOverrides applies example command flag overrides to the config.
+func (c *Config) ApplyExampleOverrides(overrides ExampleOverrides) {
+	if overrides.RootPath != nil {
+		c.RootPath = *overrides.RootPath
+	}
+	if overrides.GitLocation != nil {
+		c.GitLocation = *overrides.GitLocation
+	}
+}

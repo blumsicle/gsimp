@@ -36,6 +36,12 @@ Status values:
     Keep generation template-based for now, then add drift tests for
     canonical/generated file pairs after related package code is split
     into more focused files.
+  - 2026-04-11: Started the focused-file split with appconfig: root
+    overrides, command overrides, normalization, loading tests, and
+    generated appconfig templates now live in matching topic files.
+  - 2026-04-11: Split projectgen internals into focused files for
+    generator orchestration, input config, planning, template rendering,
+    filesystem writes, and Go version resolution.
 
 ### 2. Split `Generator.Generate` into smaller private steps
 
