@@ -12,13 +12,23 @@ builds:
       - darwin
     goarch:
       - arm64
+  - id: bcli-mcp
+    main: ./cmd/bcli-mcp
+    binary: bcli-mcp
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+    goarch:
+      - arm64
 
 archives:
   - id: bcli
     ids:
       - bcli
+      - bcli-mcp
     formats:
-      - binary
+      - tar.gz
 
 checksum:
   name_template: checksums.txt
