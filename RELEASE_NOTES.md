@@ -1,5 +1,43 @@
 # Release Notes
 
+## v0.2.5 - 2026-04-12
+
+Adds a Codex-facing MCP server for project generation and improves the
+`create` command output needed by automation.
+
+### Highlights
+
+- Added the `bcli-mcp` top-level command, which runs a stdio MCP server
+  exposing a `create_go_cli_project` tool backed by the installed
+  `bcli` binary.
+- Added `bcli create --json` to emit structured project creation
+  metadata, including project name, module path, target path, in-place
+  mode, and post-step status.
+- Added `bcli create --inplace` for creating a scaffold in the current
+  directory, with explicit handling that ignores configured `root_path`
+  and `project_dir_prefix`.
+- Added MCP and create-command tests around JSON output, argument
+  mapping, in-place generation, and skipped post-step reporting.
+- Renamed the repository's command-specific config package from
+  `internal/appconfig` to `internal/bcliconfig` now that the repo ships
+  a second top-level command.
+- Extracted shared YAML loading helpers into `internal/cli` and
+  propagated that helper into generated projects.
+- Added generated config integration tests so generated scaffolds pass
+  lint cleanly while still exercising config-file loading and command
+  execution through the shared CLI test harness.
+
+### Notes
+
+- Generated projects still use `internal/appconfig`; a future refactor
+  will rename generated config packages after project-name validation can
+  guarantee package-safe names.
+- `bcli-mcp` shells out to the configured `bcli` command instead of
+  linking directly into project generation internals, keeping MCP tool
+  behavior aligned with the user-facing CLI.
+- This remains a `0.x` release, so generated output and command surface
+  may still evolve before a `v1.0.0` stability commitment.
+
 ## v0.2.4 - 2026-04-11
 
 Improves generated project configuration ergonomics and strengthens
