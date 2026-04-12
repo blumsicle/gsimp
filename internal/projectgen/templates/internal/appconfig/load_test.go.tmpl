@@ -64,3 +64,14 @@ func TestLoadYAMLPreservesEnvironmentVariableValues(t *testing.T) {
 	assert.Equal(t, "${{ upper .Name }}_TEST_HOME/src", cfg.RootPath)
 	assert.Equal(t, "github.com/acme", cfg.GitLocation)
 }
+
+func TestLoadYAMLWrapsParseErrors(t *testing.T) {
+	configPath := filepath.Join(t.TempDir(), "{{ .Name }}.yaml")
+	require.NoError(t, os.WriteFile(configPath, []byte("root_path: [\n"), 0o644))
+
+	cfg := Default()
+	err := cfg.LoadYAML(configPath)
+
+	require.Error(t, err)
+	assert.ErrorContains(t, err, "parse {{ .Name }} config")
+}

@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/alecthomas/kong"
-	"github.com/blumsicle/bcli/internal/appconfig"
+	"github.com/blumsicle/bcli/internal/bcliconfig"
 	cliutil "github.com/blumsicle/bcli/internal/cli"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/require"
@@ -24,17 +24,17 @@ func testConfig() cliutil.Config {
 
 type cliTestHarness struct {
 	cli       *CLI
-	appConfig *appconfig.Config
+	appConfig *bcliconfig.Config
 	stdout    bytes.Buffer
 	stderr    bytes.Buffer
 	exitCode  int
 	parser    *kong.Kong
 }
 
-func newCLITestHarness(t *testing.T, appConfig *appconfig.Config) *cliTestHarness {
+func newCLITestHarness(t *testing.T, appConfig *bcliconfig.Config) *cliTestHarness {
 	t.Helper()
 	if appConfig == nil {
-		appConfig = &appconfig.Config{}
+		appConfig = &bcliconfig.Config{}
 	}
 
 	harness := &cliTestHarness{

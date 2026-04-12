@@ -1,6 +1,7 @@
 package projectgen
 
 import (
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -22,6 +23,16 @@ func newGenerationPlan(cfg Config) generationPlan {
 	}
 
 	targetPath := filepath.Join(rootPath, cfg.ProjectDirPrefix+cfg.Name)
+	if cfg.InPlace {
+		workingDir, err := os.Getwd()
+		if err == nil {
+			targetPath = workingDir
+			rootPath = workingDir
+		} else {
+			targetPath = "."
+			rootPath = "."
+		}
+	}
 	modulePath := modulePath(cfg.GitLocation, cfg.Name)
 	data := templateData{
 		Name:        cfg.Name,

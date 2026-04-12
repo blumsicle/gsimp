@@ -1,5 +1,5 @@
-// Package appconfig defines application configuration defaults and schema.
-package appconfig
+// Package bcliconfig defines bcli configuration defaults and schema.
+package bcliconfig
 
 import "github.com/rs/zerolog"
 
@@ -11,7 +11,7 @@ type PostStepsConfig struct {
 	GitCommit   bool `yaml:"git_commit"`
 }
 
-// Config contains app-wide settings loaded from defaults, YAML, and CLI overrides.
+// Config contains bcli settings loaded from defaults, YAML, and CLI overrides.
 type Config struct {
 	RootPath         string          `yaml:"root_path"`
 	ProjectDirPrefix string          `yaml:"project_dir_prefix"`

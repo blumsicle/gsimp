@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/blumsicle/bcli/internal/bcliconfig"
+	"{{ .ModulePath }}/internal/appconfig"
 	"github.com/goccy/go-yaml"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
@@ -13,40 +13,35 @@ import (
 )
 
 func TestConfigFileLoadsAndFlagsOverrideIt(t *testing.T) {
-	configPath := filepath.Join(t.TempDir(), "bcli.yaml")
+	configPath := filepath.Join(t.TempDir(), "{{ .Name }}.yaml")
 	require.NoError(
 		t,
 		os.WriteFile(
 			configPath,
 			[]byte(
-				"root_path: /from-config\nproject_dir_prefix: from-config-\ngit_location: github.com/from-config\nlog_level: debug\n",
+				"root_path: /from-config\ngit_location: github.com/from-config\nlog_level: debug\n",
 			),
 			0o644,
 		),
 	)
 
-	appConfig := &bcliconfig.Config{}
+	appConfig := &appconfig.Config{}
 	harness := newCLITestHarness(t, appConfig)
 
 	flagRootPath := "/from-flag"
-	flagProjectDirPrefix := "from-flag-"
 	flagGitLocation := "github.com/from-flag"
 	flagLogLevel := zerolog.WarnLevel
 	_, err := harness.parse(
 		t,
 		"--config-file", configPath,
 		"--log-level", "warn",
-		"create",
+		"example",
 		"--root-path", flagRootPath,
-		"--project-dir-prefix", flagProjectDirPrefix,
 		"--git-location", flagGitLocation,
-		"cooltool",
-		"CLI tool that does some cool stuff",
 	)
 	require.NoError(t, err)
 
 	assert.Equal(t, flagRootPath, appConfig.RootPath)
-	assert.Equal(t, flagProjectDirPrefix, appConfig.ProjectDirPrefix)
 	assert.Equal(t, flagGitLocation, appConfig.GitLocation)
 	assert.Equal(t, flagLogLevel, appConfig.LogLevel)
 	assert.Equal(t, -1, harness.exitCode)
@@ -55,20 +50,20 @@ func TestConfigFileLoadsAndFlagsOverrideIt(t *testing.T) {
 }
 
 func TestConfigCommandWritesMergedConfigToFile(t *testing.T) {
-	configPath := filepath.Join(t.TempDir(), "bcli.yaml")
+	configPath := filepath.Join(t.TempDir(), "{{ .Name }}.yaml")
 	outputPath := filepath.Join(t.TempDir(), "resolved.yaml")
 	require.NoError(
 		t,
 		os.WriteFile(
 			configPath,
 			[]byte(
-				"root_path: $HOME/from-config\ngit_location: $GIT_HOST/from-config\npost_steps:\n  git_commit: false\n",
+				"root_path: $HOME/from-config\ngit_location: $GIT_HOST/from-config\n",
 			),
 			0o644,
 		),
 	)
 
-	appConfig := bcliconfig.Default()
+	appConfig := appconfig.Default()
 	harness := newCLITestHarness(t, appConfig)
 
 	ctx, err := harness.parse(
@@ -85,15 +80,11 @@ func TestConfigCommandWritesMergedConfigToFile(t *testing.T) {
 	data, err := os.ReadFile(outputPath)
 	require.NoError(t, err)
 
-	var got bcliconfig.Config
+	var got appconfig.Config
 	require.NoError(t, yaml.Unmarshal(data, &got))
 	assert.Equal(t, "$HOME/from-config", got.RootPath)
 	assert.Equal(t, "$GIT_HOST/from-config", got.GitLocation)
 	assert.Equal(t, zerolog.InfoLevel, got.LogLevel)
-	assert.True(t, got.PostSteps.GoGetUpdate)
-	assert.True(t, got.PostSteps.GoModTidy)
-	assert.True(t, got.PostSteps.GitInit)
-	assert.False(t, got.PostSteps.GitCommit)
 	assert.Equal(t, -1, harness.exitCode)
 	assert.Empty(t, harness.stderrString())
 }

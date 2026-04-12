@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/blumsicle/bcli/cmd"
-	"github.com/blumsicle/bcli/internal/appconfig"
+	"github.com/blumsicle/bcli/internal/bcliconfig"
 	"github.com/goccy/go-yaml"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
@@ -37,7 +37,7 @@ func captureStdout(t *testing.T) (*os.File, func() []byte) {
 
 func TestRunWritesResolvedConfigToStdout(t *testing.T) {
 	command := Command{}
-	cfg := appconfig.Default()
+	cfg := bcliconfig.Default()
 	cfg.RootPath = "/tmp/src"
 	cfg.GitLocation = "github.com/acme"
 	cfg.PostSteps.GitCommit = false
@@ -49,7 +49,7 @@ func TestRunWritesResolvedConfigToStdout(t *testing.T) {
 	err := command.Run(zerolog.Nop(), gbl, cfg)
 	require.NoError(t, err)
 
-	var got appconfig.Config
+	var got bcliconfig.Config
 	require.NoError(t, yaml.Unmarshal(restoreStdout(), &got))
 	assert.Equal(t, *cfg, got)
 }
@@ -57,7 +57,7 @@ func TestRunWritesResolvedConfigToStdout(t *testing.T) {
 func TestRunWritesResolvedConfigToFile(t *testing.T) {
 	outputPath := filepath.Join(t.TempDir(), "resolved.yaml")
 	command := Command{Output: outputPath}
-	cfg := appconfig.Default()
+	cfg := bcliconfig.Default()
 	cfg.RootPath = "/tmp/src"
 	cfg.GitLocation = "github.com/acme"
 	cfg.PostSteps.GoGetUpdate = false
@@ -70,7 +70,7 @@ func TestRunWritesResolvedConfigToFile(t *testing.T) {
 	data, err := os.ReadFile(outputPath)
 	require.NoError(t, err)
 
-	var got appconfig.Config
+	var got bcliconfig.Config
 	require.NoError(t, yaml.Unmarshal(data, &got))
 	assert.Equal(t, *cfg, got)
 }
@@ -78,7 +78,7 @@ func TestRunWritesResolvedConfigToFile(t *testing.T) {
 func TestRunCreatesParentDirectoriesForOutputFile(t *testing.T) {
 	outputPath := filepath.Join(t.TempDir(), "nested", "dir", "resolved.yaml")
 	command := Command{Output: outputPath}
-	cfg := appconfig.Default()
+	cfg := bcliconfig.Default()
 	cfg.RootPath = "/tmp/src"
 	cfg.GitLocation = "github.com/acme"
 
@@ -90,7 +90,7 @@ func TestRunCreatesParentDirectoriesForOutputFile(t *testing.T) {
 	data, err := os.ReadFile(outputPath)
 	require.NoError(t, err)
 
-	var got appconfig.Config
+	var got bcliconfig.Config
 	require.NoError(t, yaml.Unmarshal(data, &got))
 	assert.Equal(t, *cfg, got)
 }
@@ -98,7 +98,7 @@ func TestRunCreatesParentDirectoriesForOutputFile(t *testing.T) {
 func TestRunPreservesEnvironmentVariablesInOutput(t *testing.T) {
 	outputPath := filepath.Join(t.TempDir(), "resolved.yaml")
 	command := Command{Output: outputPath}
-	cfg := appconfig.Default()
+	cfg := bcliconfig.Default()
 	cfg.RootPath = "$HOME/src"
 	cfg.GitLocation = "$GIT_HOST/acme"
 

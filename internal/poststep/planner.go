@@ -2,7 +2,7 @@
 package poststep
 
 import (
-	"github.com/blumsicle/bcli/internal/appconfig"
+	"github.com/blumsicle/bcli/internal/bcliconfig"
 	cliutil "github.com/blumsicle/bcli/internal/cli"
 	"github.com/rs/zerolog"
 )
@@ -36,11 +36,11 @@ var postStepDefinitions = []definitionSpec{
 // Planner builds the ordered post-step plan for a generator run.
 type Planner struct {
 	log zerolog.Logger
-	cfg *appconfig.PostStepsConfig
+	cfg *bcliconfig.PostStepsConfig
 }
 
 // NewPlanner constructs a Planner with subsystem-specific loggers.
-func NewPlanner(log zerolog.Logger, cfg *appconfig.PostStepsConfig) *Planner {
+func NewPlanner(log zerolog.Logger, cfg *bcliconfig.PostStepsConfig) *Planner {
 	return &Planner{
 		log: cliutil.SubLogger(log, "poststep"),
 		cfg: cfg,
@@ -95,7 +95,7 @@ func (p *Planner) Planned() []PostStep {
 	return steps
 }
 
-func (d definitionSpec) enabled(cfg *appconfig.PostStepsConfig) bool {
+func (d definitionSpec) enabled(cfg *bcliconfig.PostStepsConfig) bool {
 	switch d.id {
 	case StepGoGetUpdate:
 		return cfg.GoGetUpdate

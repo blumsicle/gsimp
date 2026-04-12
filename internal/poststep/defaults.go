@@ -2,12 +2,12 @@
 package poststep
 
 import (
-	"github.com/blumsicle/bcli/internal/appconfig"
+	"github.com/blumsicle/bcli/internal/bcliconfig"
 	"github.com/rs/zerolog"
 )
 
 // DefaultPostSteps returns the default ordered post steps for a generated project.
 func DefaultPostSteps() []PostStep {
-	cfg := appconfig.Default()
+	cfg := bcliconfig.Default()
 	return NewPlanner(zerolog.Nop(), &cfg.PostSteps).Planned()
 }

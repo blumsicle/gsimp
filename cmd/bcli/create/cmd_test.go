@@ -1,16 +1,44 @@
 package create
 
 import (
+	"encoding/json"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"testing"
 
-	"github.com/blumsicle/bcli/internal/appconfig"
+	"github.com/alecthomas/kong"
+	"github.com/blumsicle/bcli/internal/bcliconfig"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+type testCLI struct {
+	Create Command `cmd:""`
+}
+
+func captureStdout(t *testing.T) (*os.File, func() []byte) {
+	t.Helper()
+
+	originalStdout := os.Stdout
+	reader, writer, err := os.Pipe()
+	require.NoError(t, err)
+
+	os.Stdout = writer
+
+	return writer, func() []byte {
+		require.NoError(t, writer.Close())
+		os.Stdout = originalStdout
+
+		data, err := io.ReadAll(reader)
+		require.NoError(t, err)
+		require.NoError(t, reader.Close())
+
+		return data
+	}
+}
 
 func setTestGitIdentity(t *testing.T) {
 	t.Helper()
@@ -34,7 +62,7 @@ func TestRunGeneratesProject(t *testing.T) {
 		Description:      "CLI tool that does some cool stuff",
 	}
 
-	cfg := appconfig.Default()
+	cfg := bcliconfig.Default()
 	cfg.RootPath = rootPath
 	cfg.ProjectDirPrefix = projectDirPrefix
 	cfg.GitLocation = gitLocation
@@ -60,6 +88,114 @@ func TestRunGeneratesProject(t *testing.T) {
 	assert.Equal(t, "Initial commit\n", string(commitMessage))
 }
 
+func TestRunWritesCreateResultAsJSON(t *testing.T) {
+	rootPath := t.TempDir()
+	gitLocation := "github.com/blumsicle"
+	command := Command{
+		NoGoGetUpdate: true,
+		NoGoModTidy:   true,
+		NoGitInit:     true,
+		NoGitCommit:   true,
+		JSON:          true,
+		Name:          "cooltool",
+		Description:   "CLI tool that does some cool stuff",
+	}
+
+	cfg := bcliconfig.Default()
+	cfg.RootPath = rootPath
+	cfg.GitLocation = gitLocation
+	cfg.PostSteps.GoGetUpdate = false
+	cfg.PostSteps.GoModTidy = false
+	cfg.PostSteps.GitInit = false
+	cfg.PostSteps.GitCommit = false
+
+	_, restoreStdout := captureStdout(t)
+
+	err := command.Run(zerolog.Nop(), cfg)
+	require.NoError(t, err)
+
+	var got CreateResult
+	require.NoError(t, json.Unmarshal(restoreStdout(), &got))
+	assert.Equal(t, "cooltool", got.Project)
+	assert.Equal(t, "CLI tool that does some cool stuff", got.Description)
+	assert.Equal(t, "github.com/blumsicle/cooltool", got.ModulePath)
+	assert.Equal(t, filepath.Join(rootPath, "cooltool"), got.TargetPath)
+	assert.False(t, got.InPlace)
+	assert.Equal(
+		t,
+		[]PostStepResult{
+			{Name: "go get -u ./...", Ran: false},
+			{Name: "go mod tidy", Ran: false},
+			{Name: "git init", Ran: false},
+			{Name: "git commit", Ran: false},
+		},
+		got.PostSteps,
+	)
+}
+
+func TestRunCreatesProjectInPlace(t *testing.T) {
+	workingDir := t.TempDir()
+	originalWorkingDir, err := os.Getwd()
+	require.NoError(t, err)
+	require.NoError(t, os.Chdir(workingDir))
+	t.Cleanup(func() {
+		require.NoError(t, os.Chdir(originalWorkingDir))
+	})
+
+	command := Command{
+		NoGoGetUpdate: true,
+		NoGoModTidy:   true,
+		NoGitInit:     true,
+		NoGitCommit:   true,
+		InPlace:       true,
+		JSON:          true,
+		Name:          "cooltool",
+		Description:   "CLI tool that does some cool stuff",
+	}
+
+	cfg := bcliconfig.Default()
+	cfg.PostSteps.GoGetUpdate = false
+	cfg.PostSteps.GoModTidy = false
+	cfg.PostSteps.GitInit = false
+	cfg.PostSteps.GitCommit = false
+	cfg.RootPath = filepath.Join(t.TempDir(), "ignored-root")
+	cfg.ProjectDirPrefix = "ignored-prefix-"
+
+	_, restoreStdout := captureStdout(t)
+
+	err = command.Run(zerolog.Nop(), cfg)
+	require.NoError(t, err)
+
+	var got CreateResult
+	require.NoError(t, json.Unmarshal(restoreStdout(), &got))
+	expectedTargetPath, err := filepath.EvalSymlinks(workingDir)
+	require.NoError(t, err)
+	assert.Equal(t, expectedTargetPath, got.TargetPath)
+	assert.True(t, got.InPlace)
+	assert.FileExists(t, filepath.Join(workingDir, "go.mod"))
+	assert.FileExists(t, filepath.Join(workingDir, "cmd", "cooltool", "main.go"))
+	assert.NoDirExists(t, filepath.Join(workingDir, "ignored-prefix-cooltool"))
+}
+
+func TestParseRejectsInPlaceWithProjectDirPrefixFlag(t *testing.T) {
+	parser, err := kong.New(&testCLI{})
+	require.NoError(t, err)
+
+	_, err = parser.Parse([]string{
+		"create",
+		"--inplace",
+		"--project-dir-prefix",
+		"generated-",
+		"cooltool",
+		"CLI tool that does some cool stuff",
+	})
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "can't be used together")
+	assert.Contains(t, err.Error(), "--inplace")
+	assert.Contains(t, err.Error(), "--project-dir-prefix")
+}
+
 func TestRunSkipsGitPostStepsWhenGitInitIsDisabled(t *testing.T) {
 	setTestGitIdentity(t)
 
@@ -70,7 +206,7 @@ func TestRunSkipsGitPostStepsWhenGitInitIsDisabled(t *testing.T) {
 		Description: "CLI tool that does some cool stuff",
 	}
 
-	cfg := appconfig.Default()
+	cfg := bcliconfig.Default()
 	cfg.RootPath = rootPath
 	cfg.GitLocation = gitLocation
 	cfg.PostSteps.GitInit = false
@@ -94,7 +230,7 @@ func TestRunSkipsInitialCommitWhenGitCommitIsDisabled(t *testing.T) {
 		Description: "CLI tool that does some cool stuff",
 	}
 
-	cfg := appconfig.Default()
+	cfg := bcliconfig.Default()
 	cfg.RootPath = rootPath
 	cfg.GitLocation = gitLocation
 	cfg.PostSteps.GitCommit = false
@@ -115,7 +251,7 @@ func TestAfterApplyOverridesConfig(t *testing.T) {
 	rootPath := "/tmp/src"
 	projectDirPrefix := "generated-"
 	gitLocation := "github.com/acme"
-	cfg := appconfig.Default()
+	cfg := bcliconfig.Default()
 
 	command := Command{
 		RootPath:         &rootPath,
@@ -147,7 +283,7 @@ func TestRunExpandsEnvironmentVariablesForGeneration(t *testing.T) {
 		Description: "CLI tool that does some cool stuff",
 	}
 
-	cfg := appconfig.Default()
+	cfg := bcliconfig.Default()
 	cfg.RootPath = "$BCLI_CREATE_ROOT"
 	cfg.GitLocation = "$BCLI_GIT_HOST/blumsicle"
 	cfg.PostSteps.GoGetUpdate = false

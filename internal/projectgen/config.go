@@ -9,6 +9,7 @@ type Config struct {
 	GitLocation      string
 	ProjectDirPrefix string
 	RootPath         string
+	InPlace          bool
 }
 
 func validateConfig(cfg Config) error {

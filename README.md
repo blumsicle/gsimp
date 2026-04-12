@@ -14,6 +14,13 @@ dependencies, tidy the module, initialize Git, and create an initial
 commit. Each of those four post steps can be disabled through config or
 `bcli create` flags.
 
+Use `--inplace` to write the scaffold into the current directory instead
+of creating a child directory. In-place generation is intended for empty
+project directories and ignores configured `root_path` and
+`project_dir_prefix`:
+
+`bcli create --inplace mycommand "CLI tool that does some cool stuff"`
+
 By default the generated module path uses just the project name. Set
 `--git-location` or `git_location` in config if you want a fully
 qualified module path such as `github.com/your-org/<name>`.
@@ -87,6 +94,25 @@ it into a directory on `fpath`, for example:
 
 `mkdir -p ~/.zsh/completions && bcli completion zsh > ~/.zsh/completions/_bcli`
 
+Use `--json` with `bcli create` to write structured creation metadata to
+stdout. This is mainly intended for automation:
+
+`bcli create --json mycommand "CLI tool that does some cool stuff"`
+
+`bcli-mcp` runs a stdio MCP server that lets Codex create projects
+through an installed `bcli` command. Its config file defaults to
+`~/.config/bcli/bcli-mcp.yaml`. Install the binaries, then register the
+server with Codex:
+
+```sh
+make install
+codex mcp add bcli-project-generator -- bcli-mcp
+```
+
+For Codex sessions that should resume inside the new project, start
+Codex in an empty target directory and let the MCP tool call
+`bcli create --inplace`.
+
 The generated project includes:
 
 - a thin `main`
@@ -106,6 +132,7 @@ The generated project includes:
 - `bcli config` writes the resolved config as YAML to stdout or a file.
 - `bcli completion <shell>` prints a completion script for `zsh`,
   `bash`, or `fish`.
+- `bcli-mcp` starts the MCP server over stdio.
 - `make build` builds versioned binaries into `bin/`.
 - `make rebuild` forces a rebuild of versioned binaries.
 - `make install` installs the current CLI.
@@ -129,8 +156,11 @@ The `make fmt` target expects these tools to be installed locally:
 ## Layout
 
 - `cmd/bcli` contains the generator binary entrypoint and commands.
+- `cmd/bcli-mcp` contains the MCP server binary entrypoint.
 - `internal/projectgen` contains the project generator.
-- `internal/appconfig`, `internal/poststep`, `cmd/globals.go`,
+- `internal/mcpserver` contains the MCP tool server and `bcli` shell-out
+  adapter.
+- `internal/bcliconfig`, `internal/poststep`, `cmd/globals.go`,
   `internal/cli`, and `cmd/<binary>/example` define the
   generator/runtime pieces in this repo.
 - `Makefile` handles local build, install, and verification workflows.

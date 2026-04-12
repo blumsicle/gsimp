@@ -1,4 +1,4 @@
-package appconfig
+package bcliconfig
 
 // CreateOverrides contains create command flag values that can override config.
 type CreateOverrides struct {

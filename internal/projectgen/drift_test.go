@@ -38,16 +38,6 @@ var exactDriftTemplates = []exactDriftTemplate{
 		template:   "templates/Makefile.tmpl",
 	},
 	{
-		name:       "go module",
-		sourcePath: "go.mod",
-		template:   "templates/go.mod.tmpl",
-	},
-	{
-		name:       "main command",
-		sourcePath: "cmd/bcli/main.go",
-		template:   "templates/cmd/__NAME__/main.go.tmpl",
-	},
-	{
 		name:       "globals",
 		sourcePath: "cmd/globals.go",
 		template:   "templates/cmd/globals.go.tmpl",
@@ -58,44 +48,29 @@ var exactDriftTemplates = []exactDriftTemplate{
 		template:   "templates/cmd/__NAME__/completion/cmd.go.tmpl",
 	},
 	{
-		name:       "config command",
-		sourcePath: "cmd/bcli/config/cmd.go",
-		template:   "templates/cmd/__NAME__/config/cmd.go.tmpl",
-	},
-	{
-		name:       "cli test harness",
-		sourcePath: "cmd/bcli/harness_test.go",
-		template:   "templates/cmd/__NAME__/harness_test.go.tmpl",
-	},
-	{
 		name:       "completion command tests",
 		sourcePath: "cmd/bcli/completion/cmd_test.go",
 		template:   "templates/cmd/__NAME__/completion/cmd_test.go.tmpl",
 	},
 	{
-		name:       "appconfig load",
-		sourcePath: "internal/appconfig/load.go",
-		template:   "templates/internal/appconfig/load.go.tmpl",
-	},
-	{
-		name:       "appconfig normalize",
-		sourcePath: "internal/appconfig/normalize.go",
-		template:   "templates/internal/appconfig/normalize.go.tmpl",
-	},
-	{
-		name:       "appconfig root overrides",
-		sourcePath: "internal/appconfig/root.go",
-		template:   "templates/internal/appconfig/root.go.tmpl",
-	},
-	{
-		name:       "appconfig root override tests",
-		sourcePath: "internal/appconfig/root_test.go",
-		template:   "templates/internal/appconfig/root_test.go.tmpl",
-	},
-	{
 		name:       "cli build info",
 		sourcePath: "internal/cli/buildinfo.go",
 		template:   "templates/internal/cli/buildinfo.go.tmpl",
+	},
+	{
+		name:       "cli build info tests",
+		sourcePath: "internal/cli/buildinfo_test.go",
+		template:   "templates/internal/cli/buildinfo_test.go.tmpl",
+	},
+	{
+		name:       "cli config loading",
+		sourcePath: "internal/cli/config.go",
+		template:   "templates/internal/cli/config.go.tmpl",
+	},
+	{
+		name:       "cli config loading tests",
+		sourcePath: "internal/cli/config_test.go",
+		template:   "templates/internal/cli/config_test.go.tmpl",
 	},
 	{
 		name:       "cli runner",
@@ -118,6 +93,36 @@ var intentionallyDivergentTemplates = []divergentTemplate{
 		reason:     "bcli exposes create while generated projects expose example",
 	},
 	{
+		name:       "main command",
+		sourcePath: "cmd/bcli/main.go",
+		template:   "templates/cmd/__NAME__/main.go.tmpl",
+		reason:     "bcli uses a command-specific config package while generated projects still use appconfig",
+	},
+	{
+		name:       "config command",
+		sourcePath: "cmd/bcli/config/cmd.go",
+		template:   "templates/cmd/__NAME__/config/cmd.go.tmpl",
+		reason:     "bcli uses a command-specific config package while generated projects still use appconfig",
+	},
+	{
+		name:       "config command tests",
+		sourcePath: "cmd/bcli/config/cmd_test.go",
+		template:   "templates/cmd/__NAME__/config/cmd_test.go.tmpl",
+		reason:     "bcli config command tests cover stdout and post-step fields while generated projects use a smaller scaffold config",
+	},
+	{
+		name:       "cli test harness",
+		sourcePath: "cmd/bcli/harness_test.go",
+		template:   "templates/cmd/__NAME__/harness_test.go.tmpl",
+		reason:     "bcli uses a command-specific config package while generated projects still use appconfig",
+	},
+	{
+		name:       "go module",
+		sourcePath: "go.mod",
+		template:   "templates/go.mod.tmpl",
+		reason:     "bcli includes MCP server dependencies while generated projects do not",
+	},
+	{
 		name:       "root cli tests",
 		sourcePath: "cmd/bcli/main_test.go",
 		template:   "templates/cmd/__NAME__/main_test.go.tmpl",
@@ -126,7 +131,7 @@ var intentionallyDivergentTemplates = []divergentTemplate{
 	{
 		name:       "config integration tests",
 		sourcePath: "cmd/bcli/config_integration_test.go",
-		template:   "templates/cmd/__NAME__/config/cmd_test.go.tmpl",
+		template:   "templates/cmd/__NAME__/config_integration_test.go.tmpl",
 		reason:     "bcli config integration tests include create flag precedence and post-step config assertions",
 	},
 	{
@@ -136,14 +141,14 @@ var intentionallyDivergentTemplates = []divergentTemplate{
 		reason:     "bcli create tests exercise project generation while generated example tests exercise scaffold command wiring",
 	},
 	{
-		name:       "appconfig schema",
-		sourcePath: "internal/appconfig/config.go",
+		name:       "bcli config schema",
+		sourcePath: "internal/bcliconfig/config.go",
 		template:   "templates/internal/appconfig/config.go.tmpl",
-		reason:     "bcli includes post-step config while generated projects use a smaller scaffold config",
+		reason:     "bcli uses a command-specific config package and includes post-step config while generated projects use a smaller scaffold config",
 	},
 	{
 		name:       "command overrides",
-		sourcePath: "internal/appconfig/create.go",
+		sourcePath: "internal/bcliconfig/create.go",
 		template:   "templates/internal/appconfig/example.go.tmpl",
 		reason:     "bcli create overrides and generated example overrides share a pattern but represent different command domains",
 	},
@@ -154,28 +159,52 @@ var intentionallyDivergentTemplates = []divergentTemplate{
 		reason:     "bcli create generates projects while generated example command demonstrates config injection",
 	},
 	{
-		name:       "appconfig defaults tests",
-		sourcePath: "internal/appconfig/config_test.go",
+		name:       "bcli config defaults tests",
+		sourcePath: "internal/bcliconfig/config_test.go",
 		template:   "templates/internal/appconfig/config_test.go.tmpl",
-		reason:     "bcli config tests include post-step defaults while generated projects use a smaller scaffold config",
+		reason:     "bcli uses a command-specific config package and includes post-step defaults while generated projects use a smaller scaffold config",
 	},
 	{
-		name:       "appconfig example override tests",
-		sourcePath: "internal/appconfig/create_test.go",
+		name:       "bcli config create override tests",
+		sourcePath: "internal/bcliconfig/create_test.go",
 		template:   "templates/internal/appconfig/example_test.go.tmpl",
 		reason:     "bcli create override tests and generated example override tests share a pattern but represent different command domains",
 	},
 	{
-		name:       "appconfig load tests",
-		sourcePath: "internal/appconfig/load_test.go",
+		name:       "bcli config load tests",
+		sourcePath: "internal/bcliconfig/load_test.go",
 		template:   "templates/internal/appconfig/load_test.go.tmpl",
-		reason:     "bcli load tests include post-step config while generated projects use a smaller scaffold config",
+		reason:     "bcli uses a command-specific config package and includes post-step config while generated projects use a smaller scaffold config",
 	},
 	{
-		name:       "appconfig normalize tests",
-		sourcePath: "internal/appconfig/normalize_test.go",
+		name:       "bcli config normalize tests",
+		sourcePath: "internal/bcliconfig/normalize_test.go",
 		template:   "templates/internal/appconfig/normalize_test.go.tmpl",
-		reason:     "generated normalize tests use project-specific environment variable names",
+		reason:     "bcli uses a command-specific config package while generated normalize tests use project-specific environment variable names",
+	},
+	{
+		name:       "bcli config load",
+		sourcePath: "internal/bcliconfig/load.go",
+		template:   "templates/internal/appconfig/load.go.tmpl",
+		reason:     "bcli uses a command-specific config package while generated projects still use appconfig",
+	},
+	{
+		name:       "bcli config normalize",
+		sourcePath: "internal/bcliconfig/normalize.go",
+		template:   "templates/internal/appconfig/normalize.go.tmpl",
+		reason:     "bcli uses a command-specific config package while generated projects still use appconfig",
+	},
+	{
+		name:       "bcli config root overrides",
+		sourcePath: "internal/bcliconfig/root.go",
+		template:   "templates/internal/appconfig/root.go.tmpl",
+		reason:     "bcli uses a command-specific config package while generated projects still use appconfig",
+	},
+	{
+		name:       "bcli config root override tests",
+		sourcePath: "internal/bcliconfig/root_test.go",
+		template:   "templates/internal/appconfig/root_test.go.tmpl",
+		reason:     "bcli uses a command-specific config package while generated projects still use appconfig",
 	},
 }
 

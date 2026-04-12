@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/blumsicle/bcli/cmd"
-	"github.com/blumsicle/bcli/internal/appconfig"
+	"github.com/blumsicle/bcli/internal/bcliconfig"
 	cliutil "github.com/blumsicle/bcli/internal/cli"
 	"github.com/goccy/go-yaml"
 	"github.com/rs/zerolog"
@@ -19,7 +19,7 @@ type Command struct {
 }
 
 // Run writes the merged config to stdout or a file.
-func (c *Command) Run(log zerolog.Logger, gbl *cmd.Globals, cfg *appconfig.Config) (err error) {
+func (c *Command) Run(log zerolog.Logger, gbl *cmd.Globals, cfg *bcliconfig.Config) (err error) {
 	log = cliutil.SubLogger(log, "config")
 
 	data, err := yaml.Marshal(cfg)

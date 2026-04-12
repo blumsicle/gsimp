@@ -104,11 +104,11 @@ Status values:
 - Key references:
   - [cmd/bcli/cli.go:24](/Users/blumsicle/src/go/bcli/cmd/bcli/cli.go#L24)
   - [cmd/bcli/create/cmd.go:28](/Users/blumsicle/src/go/bcli/cmd/bcli/create/cmd.go#L28)
-  - [internal/appconfig/config.go](/Users/blumsicle/src/go/bcli/internal/appconfig/config.go)
+  - [internal/bcliconfig/config.go](/Users/blumsicle/src/go/bcli/internal/bcliconfig/config.go)
 - Progress notes:
   - 2026-04-09: Good candidate for explicit `Apply...Overrides` helpers
     on config or config-adjacent types.
-  - 2026-04-11: Added appconfig-owned root and create override helpers
+  - 2026-04-11: Added config-owned root and create override helpers
     so command handlers adapt flag values but no longer own config
     precedence mutation.
 
@@ -182,6 +182,25 @@ Status values:
   - 2026-04-11: Documented divergent template/source pairs in drift
     tests instead of forcing exact matches with broad normalization.
 
+### 8. Rename generated app config package when project names are validated
+
+- Status: `pending`
+- Priority: low
+- Summary:
+  Generated projects still use `internal/appconfig`, but that package is
+  command-specific once a generated project grows additional top-level
+  binaries. Rename generated config packages to a command-specific name
+  after project names have package-safe validation or sanitization.
+- Key references:
+  - [internal/projectgen/templates/internal/appconfig](/Users/blumsicle/src/go/bcli/internal/projectgen/templates/internal/appconfig)
+  - [FEATURES.md](/Users/blumsicle/src/go/bcli/FEATURES.md)
+- Progress notes:
+  - 2026-04-11: Renamed canonical bcli config to `internal/bcliconfig`
+    after adding a second top-level binary, but intentionally left
+    generated `internal/appconfig` for a later pass because generated
+    package names need project-name validation or package-safe template
+    data first.
+
 ## Suggested Order
 
 1. Manage repo/template duplication.
@@ -190,3 +209,4 @@ Status values:
 4. Simplify post-step definitions and implementations.
 5. Add a CLI test harness helper.
 6. Evaluate shared helpers for intentionally divergent templates.
+7. Rename generated app config package when project names are validated.

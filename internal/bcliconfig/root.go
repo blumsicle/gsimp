@@ -1,4 +1,4 @@
-package appconfig
+package bcliconfig
 
 import "github.com/rs/zerolog"
 

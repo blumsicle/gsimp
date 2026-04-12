@@ -47,11 +47,19 @@ func TestGenerateCreatesStarterProject(t *testing.T) {
 	assert.FileExists(t, filepath.Join(targetPath, "internal", "appconfig", "normalize.go"))
 	assert.FileExists(t, filepath.Join(targetPath, "internal", "appconfig", "root.go"))
 	assert.FileExists(t, filepath.Join(targetPath, "internal", "appconfig", "config_test.go"))
+	assert.FileExists(t, filepath.Join(targetPath, "internal", "cli", "config.go"))
+	assert.FileExists(t, filepath.Join(targetPath, "internal", "cli", "config_test.go"))
+	assert.FileExists(t, filepath.Join(targetPath, "internal", "cli", "buildinfo_test.go"))
+	assert.FileExists(
+		t,
+		filepath.Join(targetPath, "cmd", "mycommand", "config_integration_test.go"),
+	)
 
 	loadTest, err := os.ReadFile(
 		filepath.Join(targetPath, "internal", "appconfig", "load_test.go"),
 	)
 	require.NoError(t, err)
+	assert.Contains(t, string(loadTest), "parse mycommand config")
 	assert.Contains(
 		t,
 		string(loadTest),
@@ -157,6 +165,72 @@ func TestGenerateUsesCurrentDirectoryWhenRootPathIsEmpty(t *testing.T) {
 
 	require.Equal(t, "mycommand", targetPath)
 	assert.FileExists(t, filepath.Join(workingDir, "mycommand", "go.mod"))
+}
+
+func TestGenerateInPlaceUsesCurrentDirectoryAsTarget(t *testing.T) {
+	workingDir := t.TempDir()
+	originalWorkingDir, err := os.Getwd()
+	require.NoError(t, err)
+	require.NoError(t, os.Chdir(workingDir))
+	t.Cleanup(func() {
+		require.NoError(t, os.Chdir(originalWorkingDir))
+	})
+
+	result, err := New(zerolog.Nop()).GenerateResult(context.Background(), Config{
+		Name:        "mycommand",
+		Description: "CLI tool that does some cool stuff",
+		GitLocation: "github.com/blumsicle",
+		RootPath:    filepath.Join(t.TempDir(), "ignored"),
+		InPlace:     true,
+	})
+	require.NoError(t, err)
+
+	expectedTargetPath, err := filepath.EvalSymlinks(workingDir)
+	require.NoError(t, err)
+	assert.Equal(t, expectedTargetPath, result.TargetPath)
+	assert.Equal(t, "github.com/blumsicle/mycommand", result.ModulePath)
+	assert.FileExists(t, filepath.Join(workingDir, "go.mod"))
+	assert.FileExists(t, filepath.Join(workingDir, "cmd", "mycommand", "main.go"))
+	assert.NoDirExists(t, filepath.Join(workingDir, "mycommand"))
+}
+
+func TestGenerateInPlaceAllowsIgnorableDirectoryEntries(t *testing.T) {
+	workingDir := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(workingDir, ".DS_Store"), []byte(""), 0o644))
+	originalWorkingDir, err := os.Getwd()
+	require.NoError(t, err)
+	require.NoError(t, os.Chdir(workingDir))
+	t.Cleanup(func() {
+		require.NoError(t, os.Chdir(originalWorkingDir))
+	})
+
+	_, err = New(zerolog.Nop()).GenerateResult(context.Background(), Config{
+		Name:        "mycommand",
+		Description: "CLI tool that does some cool stuff",
+		InPlace:     true,
+	})
+	require.NoError(t, err)
+
+	assert.FileExists(t, filepath.Join(workingDir, "go.mod"))
+}
+
+func TestGenerateInPlaceFailsWhenCurrentDirectoryIsNotEmpty(t *testing.T) {
+	workingDir := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(workingDir, "existing.txt"), []byte("x"), 0o644))
+	originalWorkingDir, err := os.Getwd()
+	require.NoError(t, err)
+	require.NoError(t, os.Chdir(workingDir))
+	t.Cleanup(func() {
+		require.NoError(t, os.Chdir(originalWorkingDir))
+	})
+
+	_, err = New(zerolog.Nop()).GenerateResult(context.Background(), Config{
+		Name:        "mycommand",
+		Description: "CLI tool that does some cool stuff",
+		InPlace:     true,
+	})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "target directory is not empty")
 }
 
 func TestGenerateFailsWhenNameIsEmpty(t *testing.T) {

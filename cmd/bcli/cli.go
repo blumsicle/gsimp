@@ -6,7 +6,7 @@ import (
 	"github.com/blumsicle/bcli/cmd/bcli/completion"
 	"github.com/blumsicle/bcli/cmd/bcli/config"
 	"github.com/blumsicle/bcli/cmd/bcli/create"
-	"github.com/blumsicle/bcli/internal/appconfig"
+	"github.com/blumsicle/bcli/internal/bcliconfig"
 )
 
 // CLI defines the root command tree for the bcli generator.
@@ -19,12 +19,12 @@ type CLI struct {
 }
 
 // AfterApply loads file-backed config and applies root flag overrides.
-func (c *CLI) AfterApply(cfg *appconfig.Config) error {
+func (c *CLI) AfterApply(cfg *bcliconfig.Config) error {
 	if err := cfg.LoadYAML(c.ConfigFile); err != nil {
 		return err
 	}
 
-	cfg.ApplyRootOverrides(appconfig.RootOverrides{
+	cfg.ApplyRootOverrides(bcliconfig.RootOverrides{
 		LogLevel: c.LogLevel,
 	})
 

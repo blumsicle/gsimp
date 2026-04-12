@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/blumsicle/bcli/internal/appconfig"
+	"github.com/blumsicle/bcli/internal/bcliconfig"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -98,7 +98,7 @@ func TestCommandPostStepSpecReturnsRunError(t *testing.T) {
 }
 
 func TestPlannedReturnsDefaultStepsInOrder(t *testing.T) {
-	cfg := appconfig.Default()
+	cfg := bcliconfig.Default()
 
 	steps := NewPlanner(zerolog.Nop(), &cfg.PostSteps).Planned()
 
@@ -112,33 +112,33 @@ func TestPlannedReturnsDefaultStepsInOrder(t *testing.T) {
 func TestPlannedSkipsDisabledSteps(t *testing.T) {
 	tests := []struct {
 		name      string
-		configure func(cfg *appconfig.PostStepsConfig)
+		configure func(cfg *bcliconfig.PostStepsConfig)
 		want      []string
 	}{
 		{
 			name: "go get update",
-			configure: func(cfg *appconfig.PostStepsConfig) {
+			configure: func(cfg *bcliconfig.PostStepsConfig) {
 				cfg.GoGetUpdate = false
 			},
 			want: []string{"go mod tidy", "git init", "git commit"},
 		},
 		{
 			name: "go mod tidy",
-			configure: func(cfg *appconfig.PostStepsConfig) {
+			configure: func(cfg *bcliconfig.PostStepsConfig) {
 				cfg.GoModTidy = false
 			},
 			want: []string{"go get -u ./...", "git init", "git commit"},
 		},
 		{
 			name: "git init",
-			configure: func(cfg *appconfig.PostStepsConfig) {
+			configure: func(cfg *bcliconfig.PostStepsConfig) {
 				cfg.GitInit = false
 			},
 			want: []string{"go get -u ./...", "go mod tidy"},
 		},
 		{
 			name: "git commit",
-			configure: func(cfg *appconfig.PostStepsConfig) {
+			configure: func(cfg *bcliconfig.PostStepsConfig) {
 				cfg.GitCommit = false
 			},
 			want: []string{"go get -u ./...", "go mod tidy", "git init"},
@@ -147,7 +147,7 @@ func TestPlannedSkipsDisabledSteps(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cfg := appconfig.Default()
+			cfg := bcliconfig.Default()
 			tt.configure(&cfg.PostSteps)
 
 			steps := NewPlanner(zerolog.Nop(), &cfg.PostSteps).Planned()
@@ -158,7 +158,7 @@ func TestPlannedSkipsDisabledSteps(t *testing.T) {
 }
 
 func TestPlannedDisablesGitCommitWhenGitInitIsDisabled(t *testing.T) {
-	cfg := appconfig.Default()
+	cfg := bcliconfig.Default()
 	cfg.PostSteps.GitInit = false
 	cfg.PostSteps.GitCommit = true
 
