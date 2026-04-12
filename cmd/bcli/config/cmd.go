@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/blumsicle/bcli/cmd"
 	"github.com/blumsicle/bcli/internal/appconfig"
 	cliutil "github.com/blumsicle/bcli/internal/cli"
 	"github.com/goccy/go-yaml"
@@ -18,7 +19,7 @@ type Command struct {
 }
 
 // Run writes the merged config to stdout or a file.
-func (c *Command) Run(log zerolog.Logger, cfg *appconfig.Config) (err error) {
+func (c *Command) Run(log zerolog.Logger, gbl *cmd.Globals, cfg *appconfig.Config) (err error) {
 	log = cliutil.SubLogger(log, "config")
 
 	data, err := yaml.Marshal(cfg)
@@ -32,10 +33,9 @@ func (c *Command) Run(log zerolog.Logger, cfg *appconfig.Config) (err error) {
 	}
 
 	log.Debug().
+		Str("config_file", gbl.ConfigFile).
 		Str("output", outputPath).
 		Bool("stdout", outputPath == "-").
-		Str("root_path", cfg.RootPath).
-		Str("git_location", cfg.GitLocation).
 		Msg("resolved config command configuration")
 
 	output := os.Stdout

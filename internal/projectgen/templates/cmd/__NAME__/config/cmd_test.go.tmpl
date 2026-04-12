@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"{{ .ModulePath }}/cmd"
 	"{{ .ModulePath }}/internal/appconfig"
 	"github.com/goccy/go-yaml"
 	"github.com/rs/zerolog"
@@ -19,7 +20,9 @@ func TestRunWritesResolvedConfigToFile(t *testing.T) {
 	cfg.RootPath = "/from-config"
 	cfg.GitLocation = "github.com/from-config"
 
-	err := command.Run(zerolog.Nop(), cfg)
+	gbl := &cmd.Globals{}
+
+	err := command.Run(zerolog.Nop(), gbl, cfg)
 	require.NoError(t, err)
 
 	data, err := os.ReadFile(outputPath)

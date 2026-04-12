@@ -26,7 +26,7 @@ func TestLoadYAMLMissingFileKeepsDefaults(t *testing.T) {
 }
 
 func TestLoadYAMLOverridesDefaults(t *testing.T) {
-	configPath := filepath.Join(t.TempDir(), "config.yaml")
+	configPath := filepath.Join(t.TempDir(), "bcli.yaml")
 	require.NoError(
 		t,
 		os.WriteFile(
@@ -61,7 +61,7 @@ func TestLoadYAMLOverridesDefaults(t *testing.T) {
 func TestLoadYAMLPreservesEnvironmentVariableValues(t *testing.T) {
 	t.Setenv("BCLI_TEST_HOME", "/tmp/home")
 
-	configPath := filepath.Join(t.TempDir(), "config.yaml")
+	configPath := filepath.Join(t.TempDir(), "bcli.yaml")
 	require.NoError(
 		t,
 		os.WriteFile(

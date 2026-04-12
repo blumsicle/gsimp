@@ -103,7 +103,7 @@ Status values:
   Make first-run config setup clearer.
 - Candidate shapes:
   - `bcli config init`
-  - `bcli config --output ~/.config/bcli/config.yaml`
+  - `bcli config --output ~/.config/bcli/bcli.yaml`
   - `--force` to allow overwriting an existing config file.
 - Notes:
   - Current `bcli config` already writes resolved YAML. This feature

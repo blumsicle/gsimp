@@ -47,7 +47,11 @@ func TestRunWritesShellCompletionScript(t *testing.T) {
 			cli := &testCLI{}
 			command := Command{Shell: tt.shell}
 			var stdout bytes.Buffer
-			parser, err := kong.New(cli, kong.Name("bcli"), kong.Writers(&stdout, &bytes.Buffer{}))
+			parser, err := kong.New(
+				cli,
+				kong.Name("bcli"),
+				kong.Writers(&stdout, &bytes.Buffer{}),
+			)
 			require.NoError(t, err)
 
 			err = command.Run(&kong.Context{Kong: parser})

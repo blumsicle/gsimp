@@ -1,7 +1,15 @@
 // Package cmd contains shared command-line types that are imported by {{ .Name }} subcommands.
 package cmd
 
+import (
+	"github.com/alecthomas/kong"
+	"github.com/rs/zerolog"
+)
+
 // Globals defines root-level flags that are injected into command handlers.
 type Globals struct {
-	ConfigFile string `short:"c" default:"~/.config/{{ .Name }}/config.yaml" type:"path" completion:"<file>" help:"Path to the config file"`
+	ConfigFile string `short:"c" default:"~/.config/{{ .Name }}/${command_name}.yaml" type:"path" completion:"<file>" help:"Path to the config file"`
+
+	LogLevel *zerolog.Level   `short:"l" help:"Log level"`
+	Version  kong.VersionFlag `short:"v" help:"Output version"`
 }

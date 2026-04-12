@@ -13,7 +13,7 @@ import (
 )
 
 func TestConfigFileLoadsAndFlagsOverrideIt(t *testing.T) {
-	configPath := filepath.Join(t.TempDir(), "config.yaml")
+	configPath := filepath.Join(t.TempDir(), "bcli.yaml")
 	require.NoError(
 		t,
 		os.WriteFile(
@@ -55,7 +55,7 @@ func TestConfigFileLoadsAndFlagsOverrideIt(t *testing.T) {
 }
 
 func TestConfigCommandWritesMergedConfigToFile(t *testing.T) {
-	configPath := filepath.Join(t.TempDir(), "config.yaml")
+	configPath := filepath.Join(t.TempDir(), "bcli.yaml")
 	outputPath := filepath.Join(t.TempDir(), "resolved.yaml")
 	require.NoError(
 		t,

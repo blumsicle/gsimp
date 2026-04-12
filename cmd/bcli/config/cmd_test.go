@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/blumsicle/bcli/cmd"
 	"github.com/blumsicle/bcli/internal/appconfig"
 	"github.com/goccy/go-yaml"
 	"github.com/rs/zerolog"
@@ -41,9 +42,11 @@ func TestRunWritesResolvedConfigToStdout(t *testing.T) {
 	cfg.GitLocation = "github.com/acme"
 	cfg.PostSteps.GitCommit = false
 
+	gbl := &cmd.Globals{}
+
 	_, restoreStdout := captureStdout(t)
 
-	err := command.Run(zerolog.Nop(), cfg)
+	err := command.Run(zerolog.Nop(), gbl, cfg)
 	require.NoError(t, err)
 
 	var got appconfig.Config
@@ -59,7 +62,9 @@ func TestRunWritesResolvedConfigToFile(t *testing.T) {
 	cfg.GitLocation = "github.com/acme"
 	cfg.PostSteps.GoGetUpdate = false
 
-	err := command.Run(zerolog.Nop(), cfg)
+	gbl := &cmd.Globals{}
+
+	err := command.Run(zerolog.Nop(), gbl, cfg)
 	require.NoError(t, err)
 
 	data, err := os.ReadFile(outputPath)
@@ -77,7 +82,9 @@ func TestRunCreatesParentDirectoriesForOutputFile(t *testing.T) {
 	cfg.RootPath = "/tmp/src"
 	cfg.GitLocation = "github.com/acme"
 
-	err := command.Run(zerolog.Nop(), cfg)
+	gbl := &cmd.Globals{}
+
+	err := command.Run(zerolog.Nop(), gbl, cfg)
 	require.NoError(t, err)
 
 	data, err := os.ReadFile(outputPath)
@@ -95,7 +102,9 @@ func TestRunPreservesEnvironmentVariablesInOutput(t *testing.T) {
 	cfg.RootPath = "$HOME/src"
 	cfg.GitLocation = "$GIT_HOST/acme"
 
-	err := command.Run(zerolog.Nop(), cfg)
+	gbl := &cmd.Globals{}
+
+	err := command.Run(zerolog.Nop(), gbl, cfg)
 	require.NoError(t, err)
 
 	data, err := os.ReadFile(outputPath)

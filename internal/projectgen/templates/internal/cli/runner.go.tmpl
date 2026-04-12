@@ -29,6 +29,7 @@ func Options(cfg Config) []kong.Option {
 				cfg.BuildInfo.Version,
 				cfg.BuildInfo.Commit,
 			),
+			"command_name": cfg.BuildInfo.Name,
 		},
 	}
 }
