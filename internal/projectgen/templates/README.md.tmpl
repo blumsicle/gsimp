@@ -2,19 +2,20 @@
 
 {{ .Description }}
 
-Generate and run a Go CLI tool built with Kong and zerolog.
+A Go CLI tool built with Kong and zerolog.
 
 ## Usage
 
-`{{ .Name }} example` runs the example subcommand included in the
-generated project.
+`{{ .Name }} example` runs the example subcommand.
 
 The example subcommand demonstrates command-specific config overrides:
 
 `{{ .Name }} example --root-path ~/src --git-location github.com/your-org`
 
 Configuration can be loaded from the file pointed to by
-`--config-file`. The generated CLI currently supports these YAML keys:
+`--config-file`, which defaults to
+`~/.config/{{ .Name }}/{{ .Name }}.yaml`. The CLI currently supports
+these YAML keys:
 
 ```yaml
 log_level: info
@@ -61,15 +62,14 @@ zsh, write it into a directory on `fpath`, for example:
 `mkdir -p ~/.zsh/completions && {{ .Name }} completion zsh > \
 ~/.zsh/completions/_{{ .Name }}`
 
-The generated project includes:
+The project includes:
 
 - a thin `main`
 - shared app config in `internal/appconfig`
 - shared CLI runtime code under `internal/cli`
 - shared injected args in `cmd/globals.go` with a default config path
-  under `~/.config/{{ .Name }}/`
-- a `go.mod` whose `go` version matches the locally available Go
-  toolchain used to generate the project
+  at `~/.config/{{ .Name }}/{{ .Name }}.yaml`
+- a `go.mod` whose `go` version matches the local Go toolchain
 - an example subcommand
 - a shell completion subcommand
 - a config inspection subcommand

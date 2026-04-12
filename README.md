@@ -36,7 +36,8 @@ generated `go.mod`:
 that does some cool stuff"`
 
 Configuration can also be loaded from the file pointed to by
-`--config-file`. The generator currently supports these YAML keys:
+`--config-file`, which defaults to `~/.config/bcli/bcli.yaml`. The
+generator currently supports these YAML keys:
 
 ```yaml
 log_level: info
@@ -92,7 +93,7 @@ The generated project includes:
 - shared app config in `internal/appconfig`
 - shared CLI runtime code under `internal/cli`
 - shared injected args in `cmd/globals.go` with a default config path
-  under `~/.config/<project>/`
+  at `~/.config/<project>/<project>.yaml`
 - a `go.mod` whose `go` version matches the locally available Go
   toolchain used to run `bcli`
 - a shell completion subcommand for `zsh`, `bash`, and `fish`
