@@ -3,10 +3,12 @@ package cli
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"time"
 
 	"github.com/alecthomas/kong"
+	"github.com/mattn/go-isatty"
 	"github.com/rs/zerolog"
 )
 
@@ -56,8 +58,8 @@ func Parse(app any, cfg Config, options ...kong.Option) *kong.Context {
 }
 
 // NewLogger constructs the standard console logger for a CLI binary.
-func NewLogger(level zerolog.Level) zerolog.Logger {
-	cw := zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.DateTime + " MST"}
+func NewLogger(level zerolog.Level, stderr io.Writer) zerolog.Logger {
+	cw := newConsoleWriter(stderr)
 
 	return SubLogger(
 		zerolog.New(cw).
@@ -67,6 +69,19 @@ func NewLogger(level zerolog.Level) zerolog.Logger {
 			Logger(),
 		"main",
 	)
+}
+
+func newConsoleWriter(stderr io.Writer) zerolog.ConsoleWriter {
+	return zerolog.ConsoleWriter{
+		Out:        stderr,
+		NoColor:    !isInteractiveTerminal(stderr),
+		TimeFormat: time.DateTime + " MST",
+	}
+}
+
+func isInteractiveTerminal(stderr io.Writer) bool {
+	file, ok := stderr.(*os.File)
+	return ok && isatty.IsTerminal(file.Fd())
 }
 
 // SubLogger returns a logger rebound to the provided subsystem name.

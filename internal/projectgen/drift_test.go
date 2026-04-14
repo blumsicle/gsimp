@@ -77,6 +77,11 @@ var exactDriftTemplates = []exactDriftTemplate{
 		sourcePath: "internal/cli/runner.go",
 		template:   "templates/internal/cli/runner.go.tmpl",
 	},
+	{
+		name:       "cli runner tests",
+		sourcePath: "internal/cli/runner_test.go",
+		template:   "templates/internal/cli/runner_test.go.tmpl",
+	},
 }
 
 var intentionallyDivergentTemplates = []divergentTemplate{

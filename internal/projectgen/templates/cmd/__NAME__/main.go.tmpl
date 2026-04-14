@@ -25,7 +25,7 @@ func main() {
 	zerolog.DurationFieldUnit = time.Minute
 	zerolog.TimeFieldFormat = time.DateTime + " MST"
 
-	log := cliutil.NewLogger(appConfig.LogLevel)
+	log := cliutil.NewLogger(appConfig.LogLevel, ctx.Stderr)
 
 	if err := cliutil.Run(ctx, log); err != nil {
 		log.Error().Err(err).Send()
