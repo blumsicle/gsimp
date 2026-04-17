@@ -1,5 +1,31 @@
 # Release Notes
 
+## v0.2.6 - 2026-04-17
+
+Replaces Make-based workflows with Task and improves console logging for
+non-interactive environments.
+
+### Highlights
+
+- Replaced the repository `Makefile` with `Taskfile.yml` while
+  preserving the existing build, install, format, lint, test, vet,
+  check, coverage, dependency, and cleanup workflows.
+- Updated generated projects to include `Taskfile.yml` instead of a
+  `Makefile`, with matching README guidance and template drift coverage.
+- Updated release automation and GitHub Actions verification to install
+  Task and run `task fmt` and `task check`.
+- Disabled zerolog console colors when stderr is not an interactive
+  terminal, improving redirected output, CI logs, and automation.
+- Propagated the non-interactive logger behavior and tests into
+  generated project templates.
+
+### Notes
+
+- This release changes generated scaffold files and developer workflow
+  commands, but does not change the `bcli create` CLI surface.
+- Local development now requires Task in addition to the existing Go
+  formatting and linting tools.
+
 ## v0.2.5 - 2026-04-12
 
 Adds a Codex-facing MCP server for project generation and improves the
