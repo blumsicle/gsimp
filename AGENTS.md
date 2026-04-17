@@ -26,20 +26,20 @@ matching `.tmpl` files.
 
 ## Build, Test, and Development Commands
 
-Use `make` targets as the primary interface:
+Use `task` tasks as the primary interface:
 
-- `make install`: install the local CLI from `cmd/*/main.go`
-- `make build`: build versioned binaries into `bin/`
-- `make fmt`: run `gofumpt`, `gci`, `goimports`, and `golines`
-- `make lint`: run `golangci-lint run ./...`
-- `make test`: run `go test ./...`
-- `make vet`: run `go vet ./...`
-- `make check`: run `make lint`, `make vet`, and `make test`
+- `task install`: install the local CLI from `cmd/*/main.go`
+- `task build`: build versioned binaries into `bin/`
+- `task fmt`: run `gofumpt`, `gci`, `goimports`, and `golines`
+- `task lint`: run `golangci-lint run ./...`
+- `task test`: run `go test ./...`
+- `task vet`: run `go vet ./...`
+- `task check`: run `task lint`, `task vet`, and `task test`
 - `golangci-lint run ./...`: run the full lint suite expected by the repo
 
-Standard verification flow after changes: `make fmt`, then `make check`.
+Standard verification flow after changes: `task fmt`, then `task check`.
 
-Run `make check` outside the sandbox for this repository. The
+Run `task check` outside the sandbox for this repository. The
 verification flow invokes `go` and `git` in temporary directories and
 relies on normal Go build cache access.
 After code changes, also review user-facing documentation files such as
@@ -76,7 +76,7 @@ Preserve that behavior when refactoring.
 
 When asked to create a release, write or update a descriptive
 `RELEASE_NOTES.md` manually rather than auto-generating a minimal
-changelog. Then run `make fmt` and `make check` before tagging. Use
+changelog. Then run `task fmt` and `task check` before tagging. Use
 `scripts/release.sh --no-ask vX.Y.Z` after `RELEASE_NOTES.md` is
 already updated in the worktree; the script stages `RELEASE_NOTES.md`,
 creates the release commit, creates an annotated tag, and pushes both
@@ -87,7 +87,7 @@ confirmation that `RELEASE_NOTES.md` was updated before proceeding.
 
 The GitHub Actions workflow at `.github/workflows/release.yml`
 publishes releases for pushed `v*` tags via GoReleaser using
-`.goreleaser.yaml`. It runs `make fmt` and `make check`, builds the
+`.goreleaser.yaml`. It runs `task fmt` and `task check`, builds the
 `darwin/arm64` `bcli` binary, and publishes the GitHub release using
 `RELEASE_NOTES.md` from the tagged commit as the release body.
 GitHub repository settings must allow workflow `contents: write`

@@ -105,7 +105,7 @@ through an installed `bcli` command. Its config file defaults to
 server with Codex:
 
 ```sh
-make install
+task install
 codex mcp add bcli-project-generator -- bcli-mcp
 ```
 
@@ -124,7 +124,7 @@ The generated project includes:
   toolchain used to run `bcli`
 - a shell completion subcommand for `zsh`, `bash`, and `fish`
 - an example subcommand
-- a Makefile with build, rebuild, test, vet, check, and clean targets
+- a Taskfile with build, rebuild, test, vet, check, and clean tasks
 - smoke tests for help, version, and command wiring
 
 ## Common Commands
@@ -133,25 +133,28 @@ The generated project includes:
 - `bcli completion <shell>` prints a completion script for `zsh`,
   `bash`, or `fish`.
 - `bcli-mcp` starts the MCP server over stdio.
-- `make build` builds versioned binaries into `bin/`.
-- `make rebuild` forces a rebuild of versioned binaries.
-- `make install` installs the current CLI.
-- `make lint` runs `golangci-lint`.
-- `make test` runs Go tests.
-- `make coverage` runs Go tests with coverage output.
-- `make coverage-html` generates an HTML coverage report.
-- `make vet` runs `go vet`.
-- `make check` runs linting, tests, and vetting together.
-- `make clean` removes built artifacts from `bin/`.
+- `task build` builds versioned binaries into `bin/`.
+- `task rebuild` removes built artifacts and rebuilds versioned binaries.
+- `task install` installs the current CLI.
+- `task lint` runs `golangci-lint`.
+- `task test` runs Go tests.
+- `task coverage` runs Go tests with coverage output.
+- `task coverage-html` generates an HTML coverage report.
+- `task vet` runs `go vet`.
+- `task check` runs linting, tests, and vetting together.
+- `task clean` removes built artifacts from `bin/`.
 
 ## Tooling
 
-The `make fmt` target expects these tools to be installed locally:
+The `task fmt` task expects these tools to be installed locally:
 
 - `gofumpt`
 - `gci`
 - `goimports`
 - `golines`
+
+Install Task with your package manager, for example `brew install
+go-task/tap/go-task`.
 
 ## Layout
 
@@ -163,4 +166,4 @@ The `make fmt` target expects these tools to be installed locally:
 - `internal/bcliconfig`, `internal/poststep`, `cmd/globals.go`,
   `internal/cli`, and `cmd/<binary>/example` define the
   generator/runtime pieces in this repo.
-- `Makefile` handles local build, install, and verification workflows.
+- `Taskfile.yml` handles local build, install, and verification workflows.

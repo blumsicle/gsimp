@@ -33,9 +33,9 @@ var exactDriftTemplates = []exactDriftTemplate{
 		template:   "templates/.gitignore.tmpl",
 	},
 	{
-		name:       "makefile",
-		sourcePath: "Makefile",
-		template:   "templates/Makefile.tmpl",
+		name:       "taskfile",
+		sourcePath: "Taskfile.yml",
+		template:   "templates/Taskfile.yml.tmpl",
 	},
 	{
 		name:       "globals",

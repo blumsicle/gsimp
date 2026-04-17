@@ -75,7 +75,7 @@ func TestRunGeneratesProject(t *testing.T) {
 	assert.DirExists(t, filepath.Join(projectPath, ".git"))
 	assert.FileExists(t, filepath.Join(projectPath, "go.mod"))
 	assert.FileExists(t, filepath.Join(projectPath, "go.sum"))
-	assert.FileExists(t, filepath.Join(projectPath, "Makefile"))
+	assert.FileExists(t, filepath.Join(projectPath, "Taskfile.yml"))
 	assert.FileExists(t, filepath.Join(projectPath, "cmd", "cooltool", "main.go"))
 
 	gitConfig, err := os.ReadFile(filepath.Join(projectPath, ".git", "config"))

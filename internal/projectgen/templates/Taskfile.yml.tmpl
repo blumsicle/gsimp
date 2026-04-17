@@ -1,0 +1,96 @@
+version: "3"
+
+vars:
+  GO:
+    sh: 'printf "%s" "${GO:-go}"'
+  APP_NAMES:
+    sh: >-
+      find cmd -mindepth 2 -maxdepth 2 -name main.go -print
+      | sed 's#^cmd/##; s#/main.go$##'
+      | sort
+      | tr '\n' ' '
+  VERSION:
+    sh: >-
+      git describe --tags --exact-match 2>/dev/null
+      || git describe --tags --always --dirty 2>/dev/null
+      || echo dev
+
+env:
+  CGO_ENABLED: 0
+
+tasks:
+  install:
+    desc: Install local CLI binaries from cmd/*/main.go.
+    cmds:
+      - for: { var: APP_NAMES }
+        cmd: "{{ "{{.GO}}" }} install ./cmd/{{ "{{.ITEM}}" }}"
+
+  build:
+    desc: Build versioned binaries into bin/.
+    cmds:
+      - mkdir -p bin
+      - for: { var: APP_NAMES }
+        cmd: "{{ "{{.GO}}" }} build -o bin/{{ "{{.ITEM}}" }}-{{ "{{.VERSION}}" }} ./cmd/{{ "{{.ITEM}}" }}"
+
+  rebuild:
+    desc: Remove built artifacts and rebuild versioned binaries.
+    cmds:
+      - task: clean
+      - task: build
+
+  generate:
+    desc: Run go generate.
+    cmd: "{{ "{{.GO}}" }} generate ./..."
+
+  deps:
+    desc: Download module dependencies.
+    cmd: "{{ "{{.GO}}" }} mod download"
+
+  tidy:
+    desc: Tidy module dependencies.
+    cmd: "{{ "{{.GO}}" }} mod tidy"
+
+  update:
+    desc: Update module dependencies.
+    cmd: "{{ "{{.GO}}" }} get -u ./..."
+
+  fmt:
+    desc: Format Go source.
+    cmds:
+      - gofumpt -w .
+      - gci write .
+      - goimports -w .
+      - golines -w .
+
+  lint:
+    desc: Run golangci-lint.
+    cmd: golangci-lint run ./...
+
+  check:
+    desc: Run lint, vet, and tests.
+    cmds:
+      - task: lint
+      - task: vet
+      - task: test
+
+  clean:
+    desc: Remove built artifacts.
+    cmd: rm -rf bin
+
+  test:
+    desc: Run Go tests.
+    cmd: "{{ "{{.GO}}" }} test ./..."
+
+  coverage:
+    desc: Run Go tests with coverage output.
+    cmd: "{{ "{{.GO}}" }} test -cover ./..."
+
+  coverage-html:
+    desc: Generate an HTML coverage report.
+    cmds:
+      - "{{ "{{.GO}}" }} test -coverprofile=coverage.out ./..."
+      - "{{ "{{.GO}}" }} tool cover -html=coverage.out"
+
+  vet:
+    desc: Run go vet.
+    cmd: "{{ "{{.GO}}" }} vet ./..."

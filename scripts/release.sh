@@ -71,8 +71,8 @@ if [[ "${notes_tracked}" == true ]] && git diff --quiet -- RELEASE_NOTES.md && g
 	exit 1
 fi
 
-make fmt
-make check
+task fmt
+task check
 
 git add RELEASE_NOTES.md
 git commit -m "Prepare release ${version}"

@@ -23,6 +23,9 @@ jobs:
         with:
           go-version-file: go.mod
 
+      - name: Install Task
+        uses: go-task/setup-task@v1
+
       - name: Install formatting and lint tools
         run: |
           echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
@@ -34,8 +37,8 @@ jobs:
 
       - name: Verify
         run: |
-          make fmt
-          make check
+          task fmt
+          task check
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v7
