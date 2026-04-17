@@ -163,7 +163,6 @@ go-task/tap/go-task`.
 - `internal/projectgen` contains the project generator.
 - `internal/mcpserver` contains the MCP tool server and `bcli` shell-out
   adapter.
-- `internal/bcliconfig`, `internal/poststep`, `cmd/globals.go`,
-  `internal/cli`, and `cmd/<binary>/example` define the
-  generator/runtime pieces in this repo.
+- `internal/bcliconfig`, `internal/poststep`, `cmd/globals.go`, and
+  `internal/cli` define the generator/runtime pieces in this repo.
 - `Taskfile.yml` handles local build, install, and verification workflows.

@@ -14,8 +14,9 @@ Repository identity:
 
 Core packages live under `internal/`:
 
-- `internal/appconfig`: config defaults, YAML loading, and config tests
+- `internal/bcliconfig`: bcli config defaults, YAML loading, and config tests
 - `internal/cli`: shared runtime helpers such as runner and build info
+- `internal/mcpserver`: MCP server config, tool handlers, and shell-out adapter
 - `internal/projectgen`: template rendering and generation orchestration
 - `internal/poststep`: side-effecting post-generation steps such as
   `go mod tidy` and `git init`
