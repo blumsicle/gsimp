@@ -41,6 +41,11 @@ func TestGenerateCreatesStarterProject(t *testing.T) {
 		"BuildInfo:   cliutil.ResolveBuildInfo(name),",
 	)
 
+	mainTest, err := os.ReadFile(filepath.Join(targetPath, "cmd", "mycommand", "main_test.go"))
+	require.NoError(t, err)
+	assert.Contains(t, string(mainTest), "normalizedHelpText(harness.stdoutString())")
+	assert.Contains(t, string(mainTest), "normalizedHelpText(\"CLI tool that does some cool stuff\")")
+
 	assert.FileExists(t, filepath.Join(targetPath, "internal", "appconfig", "config.go"))
 	assert.FileExists(t, filepath.Join(targetPath, "internal", "appconfig", "example.go"))
 	assert.FileExists(t, filepath.Join(targetPath, "internal", "appconfig", "load.go"))
