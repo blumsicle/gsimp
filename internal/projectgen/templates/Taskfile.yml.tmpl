@@ -19,6 +19,10 @@ env:
   CGO_ENABLED: 0
 
 tasks:
+  default:
+    cmds:
+      - task: install
+
   install:
     desc: Install local CLI binaries from cmd/*/main.go.
     cmds:
