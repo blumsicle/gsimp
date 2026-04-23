@@ -38,6 +38,11 @@ var exactDriftTemplates = []exactDriftTemplate{
 		template:   "templates/Taskfile.yml.tmpl",
 	},
 	{
+		name:       "makefile",
+		sourcePath: "Makefile",
+		template:   "templates/Makefile.tmpl",
+	},
+	{
 		name:       "globals",
 		sourcePath: "cmd/globals.go",
 		template:   "templates/cmd/globals.go.tmpl",

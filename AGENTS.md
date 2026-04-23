@@ -40,6 +40,9 @@ Use `task` tasks as the primary interface:
 
 Standard verification flow after changes: `task fmt`, then `task check`.
 
+A compatibility `Makefile` is also present for environments where Task
+is unavailable, but `task` remains the default interface.
+
 Run `task check` outside the sandbox for this repository. The
 verification flow invokes `go` and `git` in temporary directories and
 relies on normal Go build cache access.

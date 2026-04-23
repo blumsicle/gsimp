@@ -125,6 +125,8 @@ The generated project includes:
 - a shell completion subcommand for `zsh`, `bash`, and `fish`
 - an example subcommand
 - a Taskfile with build, rebuild, test, vet, check, and clean tasks
+- a Makefile backup with the same workflows for environments without
+  Task
 - smoke tests for help, version, and command wiring
 
 ## Common Commands
@@ -143,6 +145,8 @@ The generated project includes:
 - `task vet` runs `go vet`.
 - `task check` runs linting, tests, and vetting together.
 - `task clean` removes built artifacts from `bin/`.
+- `make <target>` remains available as a backup when `task` is not
+  installed.
 
 ## Tooling
 
@@ -153,8 +157,9 @@ The `task fmt` task expects these tools to be installed locally:
 - `goimports`
 - `golines`
 
-Install Task with your package manager, for example `brew install
-go-task/tap/go-task`.
+Task is the primary workflow tool. Install it with your package manager,
+for example `brew install go-task/tap/go-task`. A Makefile is also
+included as a fallback when Task is unavailable.
 
 ## Layout
 
@@ -165,4 +170,6 @@ go-task/tap/go-task`.
   adapter.
 - `internal/bcliconfig`, `internal/poststep`, `cmd/globals.go`, and
   `internal/cli` define the generator/runtime pieces in this repo.
-- `Taskfile.yml` handles local build, install, and verification workflows.
+- `Taskfile.yml` is the primary build, install, and verification
+  workflow.
+- `Makefile` provides a compatibility fallback for the same workflows.
